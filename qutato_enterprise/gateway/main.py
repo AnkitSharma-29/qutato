@@ -6,6 +6,8 @@ from qutato_enterprise.gateway.config import settings
 from qutato_enterprise.gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
 from qutato_core.engine.budget import budget_manager
 from qutato_core.engine.loop_detector import loop_detector
+from qutato_core.engine.updater import print_update_notification
+from qutato_core.version import __version__
 
 # Qutato Smart Core: The definitive Trust & Abstention platform.
 # This engine hides provider complexity and ensures mathematical safety.
@@ -123,4 +125,9 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
+    from qutato_core.engine.logo import print_logo
+    print_logo()
+    print(f"🚀 [Qutato] Starting Gateway v{__version__}...")
+    # Check for updates on startup (non-blocking)
+    print_update_notification()
     uvicorn.run(app, host="0.0.0.0", port=8000)

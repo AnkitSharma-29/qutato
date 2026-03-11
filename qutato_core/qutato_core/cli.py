@@ -4,6 +4,8 @@ from qutato_core.engine.memory import memory_engine
 from qutato_core.engine.quota import quota_manager
 from qutato_core.engine.budget import budget_manager
 from qutato_core.engine.loop_detector import loop_detector
+from qutato_core.engine.updater import print_update_notification
+from qutato_core.version import __version__
 
 def main():
     parser = argparse.ArgumentParser(description="Qutato — The Smart Core Trust Platform")
@@ -28,6 +30,9 @@ def main():
     budget_parser.add_argument("--set", type=float, help="Set daily limit in USD (e.g. --set 5.00)")
     budget_parser.add_argument("--reset", action="store_true", help="Reset today's spending")
 
+    # Command: update
+    subparsers.add_parser("update", help="Update Qutato to the latest version")
+
     args = parser.parse_args()
 
     if args.command == "status":
@@ -36,7 +41,7 @@ def main():
         budget = budget_manager.get_status()
         loops = loop_detector.get_stats()
 
-        print(f"--- Qutato Smart Core Status ---")
+        print(f"--- Qutato Smart Core Status (v{__version__}) ---")
         print(f"Memory Health: Optimized")
         print(f"Known Facts:   {count}")
         print(f"Quota Saved:   {saved_calls} requests (~{saved_tokens} tokens)")
@@ -44,6 +49,9 @@ def main():
         print(f"Requests Today:{budget['requests_today']}")
         print(f"Loops Killed:  {loops['total_loops_killed']}")
         print(f"DB Path:       {memory_engine.db_path}")
+        
+        # Check for updates (non-blocking)
+        print_update_notification()
 
     elif args.command == "learn":
         memory_engine.store(args.text)
@@ -81,6 +89,23 @@ def main():
             print(f"Tokens Today:   {b['tokens_today']}")
             print(f"Requests Today: {b['requests_today']}")
             print(f"Blocked Today:  {b['blocked_today']}")
+
+    elif args.command == "update":
+        from qutato_core.engine.logo import print_logo
+        import subprocess
+        print_logo()
+        print("📥 Pulling latest updates from GitHub...")
+        try:
+            # Assumes the user installed via git clone
+            result = subprocess.run(["git", "pull", "origin", "main"], capture_output=True, text=True)
+            if result.returncode == 0:
+                print("✅ Update successful!")
+                print(result.stdout)
+            else:
+                print("❌ Update failed.")
+                print(result.stderr)
+        except Exception as e:
+            print(f"❌ Error during update: {e}")
 
     else:
         parser.print_help()
