@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+litellm
+redis
+python-dotenv
+pydantic
+pydantic-settings
+asyncio
+httpx
