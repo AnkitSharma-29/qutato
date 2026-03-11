@@ -76,8 +76,9 @@ qutato status
 
 ## Highlights
 
+- **[Daily Budget Cap](#budget-manager)** — Prevent "bill shock." Set a daily limit (e.g., $5) and Qutato blocks all further LLM calls once reached.
+- **[Agent Loop Detector](#loop-detector)** — Auto-kills runaway agent loops. If an agent repeats the same action 3 times, Qutato stops it to save your budget.
 - **[Input Guardrails](#input-guardrails)** — Junk detection, keyboard mashing filter, sensitive keyword flagging. Blocks bad prompts before they cost you tokens.
-- **[Mathematical Abstention](#abstention-engine)** — Adaptive thresholding that forces the AI to say "I don't know" instead of hallucinating.
 - **[Persistent Memory Brain](#memory-engine)** — A "Second Brain" for agents that stores facts and recalls context across sessions.
 - **[Quota Optimization](#quota-savings)** — Tracks every token you save. Shows your ROI in real-time.
 - **[Sidecar SDK](#sidecar-agent-sdk)** — Direct Python integration for any AI agent (no HTTP needed).
@@ -96,7 +97,18 @@ qutato status
 
 ### Trust + safety
 
-#### Input Guardrails
+#### Budget Manager (Solo Builder's Shield) 💰
+- **Daily Cap:** Set a maximum dollar amount you're willing to spend each day.
+- **Cost Tracking:** Qutato estimates the cost of every request (GPT-4o, Claude, Gemini, etc.) in real-time.
+- **Auto-Reset:** Resets at midnight local time automatically.
+- **CLI Commands:** `qutato budget --set 5.00`, `qutato budget --reset`.
+
+### Loop Detector 🔄
+- **Auto-Kill:** Detects when an agent is repeating the same prompt/logic in a loop.
+- **Pattern Matching:** Uses Jaccard similarity to catch subtle variations of the same loop.
+- **Cost Protection:** Each killed loop saves hundreds of tokens and prevents runaway bills.
+
+### Input Guardrails
 - **Junk Detection:** Blocks keyboard mashing (`asdfghjkl`), repeated characters, and nonsensical prompts.
 - **Sensitive Keyword Flagging:** Detects passwords, secret keys, and private data in prompts.
 - **Short Prompt Filter:** Prevents wasteful single-character or empty requests.

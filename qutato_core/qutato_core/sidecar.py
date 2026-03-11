@@ -29,19 +29,32 @@ Usage:
 from qutato_core.engine.memory import memory_engine
 from qutato_core.engine.detector import prompt_detector
 from qutato_core.engine.quota import quota_manager
+from qutato_core.engine.budget import budget_manager
+from qutato_core.engine.loop_detector import loop_detector
 import json
 
 
 class QutaoSidecar:
     """Direct Python integration for AI agents — no HTTP needed."""
 
-    def is_safe(self, prompt: str) -> bool:
-        """Vet a prompt using Qutato's Guardrails. Returns True if safe."""
+    def is_safe(self, prompt: str, model: str = "default") -> bool:
+        """Full safety check: junk + loop + budget. Returns True if safe."""
+        # 1. Check for junk
         report = prompt_detector.analyze_prompt(prompt)
         if report["is_junk"]:
             print(f"🚫 [Qutato Sidecar] Blocked JUNK: '{prompt[:40]}...'")
             quota_manager.log_savings("sidecar_agent", estimated_tokens=10)
             return False
+
+        # 2. Check for loops
+        if loop_detector.is_loop(prompt):
+            quota_manager.log_savings("sidecar_agent", estimated_tokens=250)
+            return False
+
+        # 3. Check budget
+        if not budget_manager.can_spend(model):
+            return False
+
         if report["is_sensitive"]:
             print(f"⚠️  [Qutato Sidecar] Sensitive content detected in: '{prompt[:40]}...'")
         print(f"✅ [Qutato Sidecar] Safe: '{prompt[:40]}...'")
@@ -63,10 +76,24 @@ class QutaoSidecar:
         quota_manager.log_savings(user_id, estimated_tokens=tokens)
         print(f"💰 [Qutato Sidecar] Logged saving: {tokens} tokens")
 
+    def log_spend(self, model: str = "default", tokens: int = 500) -> None:
+        """Log actual token spending after an LLM call."""
+        budget_manager.log_spend(model, tokens)
+
+    def budget(self) -> dict:
+        """Get current budget status."""
+        return budget_manager.get_status()
+
+    def set_budget(self, daily_limit_usd: float) -> None:
+        """Set the daily spending cap."""
+        budget_manager.set_daily_limit(daily_limit_usd)
+
     def status(self) -> dict:
-        """Get Qutato's current status as a dictionary."""
+        """Get Qutato's full status as a dictionary."""
         saved_calls, saved_tokens = quota_manager.get_savings("antigravity_agent")
         total_calls, total_tokens = quota_manager.get_savings("default_user")
+        budget = budget_manager.get_status()
+        loops = loop_detector.get_stats()
         return {
             "memory_health": "Optimized",
             "known_facts": len(memory_engine.memories),
@@ -74,6 +101,8 @@ class QutaoSidecar:
             "agent_saved_tokens": saved_tokens,
             "total_saved_calls": total_calls + saved_calls,
             "total_saved_tokens": total_tokens + saved_tokens,
+            "budget": budget,
+            "loops_killed": loops["total_loops_killed"],
             "db_path": memory_engine.db_path
         }
 

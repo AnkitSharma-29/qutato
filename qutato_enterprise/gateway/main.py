@@ -4,6 +4,8 @@ import litellm
 import uvicorn
 from qutato_enterprise.gateway.config import settings
 from qutato_enterprise.gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
+from qutato_core.engine.budget import budget_manager
+from qutato_core.engine.loop_detector import loop_detector
 
 # Qutato Smart Core: The definitive Trust & Abstention platform.
 # This engine hides provider complexity and ensures mathematical safety.
@@ -61,6 +63,24 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
                     detail="Junk input detected. Qutato blocked this to save your quota."
                 )
             
+            # 4. Loop Detection
+            if loop_detector.is_loop(last_prompt):
+                print(f"🔄 [Qutato] Loop detected. Auto-killing request.")
+                from qutato_core.engine.quota import quota_manager
+                quota_manager.log_savings(user_id, estimated_tokens=250)
+                raise HTTPException(
+                    status_code=429,
+                    detail="Agent loop detected. Qutato stopped this to save your budget."
+                )
+
+            # 5. Budget Check
+            model = data.get("model", "default")
+            if not budget_manager.can_spend(model, estimated_tokens=500):
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Daily budget limit reached. Spent: {budget_manager.get_status()['spent_today']}"
+                )
+
             # Auto-elevate sensitivity if keywords detected
             if report["is_sensitive"]:
                 sensitive = True
@@ -71,6 +91,10 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
             api_key=llm_api_key,
             additional_args={"user_id": user_id, "sensitive": sensitive}
         )
+        
+        # 6. Log Actual Spend if successful
+        tokens_used = response.get("usage", {}).get("total_tokens", 500)
+        budget_manager.log_spend(model, tokens_used)
         
         return response
     except HTTPException as e:
