@@ -25,6 +25,22 @@ Unlike traditional proxies, Qutato uses **Adaptive Thresholding** and **Persiste
 
 ---
 
+## 🎯 Why Qutato?
+
+### Where to Use It
+*   **Enterprise AI Agents:** Customer support, Finance, and Legal desks where a hallucination is a liability.
+*   **Multi-Agent Ecosystems:** Autonomous fleets requiring a shared, vetted memory "Brain."
+*   **Safety-Critical RAG:** Scientific research or internal knowledge discovery where "guessing" is not allowed.
+*   **Production Gateways:** Scaling AI teams that need to manage millions of requests across different providers without losing control.
+
+### The Qutato Benefits
+*   **Trust by Default:** Eliminate "Confident Hallucinations" with mathematical certainty.
+*   **Massive Cost Savings:** Intercept high-risk or out-of-scope queries before they hit expensive premium models.
+*   **Zero-Overhead Protection:** At 0.022ms, the layer is invisible to the user but bulletproof for the business.
+*   **Actionable Context:** Qutato doesn't just store memory; it uses it to lower safety hurdles for verified facts, making your AI feel "smarter" and "faster."
+
+---
+
 ## 📦 Project Structure
 
 ### 1. [Qutato-Core](./qutato_core) (Open Source)
@@ -60,6 +76,26 @@ python -m qutato_enterprise.gateway.main
 python qutato_enterprise/cli.py learn "Qutato HQ is the center of trust."
 python qutato_enterprise/cli.py recall "HQ"
 ```
+
+---
+
+## 🤖 Agentic SDK & Supervisor Pattern
+
+Qutato is designed to be the **Safety Firewall** for AI Agents. It is trivial to integrate into any agentic loop to prevent autonomous mistakes.
+
+### Two-Line Implementation
+```python
+from qutato_core.engine.abstention import abstention_engine
+
+# Vet the agent's thought before it takes an action
+block, _ = abstention_engine.should_abstain(model_confidence=0.4)
+if block: agent.replan()
+```
+
+### Why use it for Agents?
+1.  **Autonomous Safety:** Agents often "hallucinate" tools or commands. Qutato blocks these before they execute.
+2.  **Shared Memory:** Agents share the **Qutato Brain**, ensuring they don't miss context when handing off tasks.
+3.  **Active Supervision:** Qutato acts as a "Senior Engineer" reviewing the agent's junior-level thoughts.
 
 ---
 
