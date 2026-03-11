@@ -1,33 +1,45 @@
+import json
+import os
 import time
 from typing import List, Dict, Optional
 
 class Fact:
-    def __init__(self, text: str, metadata: Optional[Dict] = None):
+    def __init__(self, text: str, metadata: Optional[Dict] = None, timestamp: float = None):
         self.text = text
-        self.timestamp = time.time()
+        self.timestamp = timestamp or time.time()
         self.metadata = metadata or {}
+
+    def to_dict(self):
+        return {"text": self.text, "timestamp": self.timestamp, "metadata": self.metadata}
 
 class QutatoMemory:
     """
-    A lightweight Memory Engine for Qutato.
-    Focuses on fact persistence and context retrieval.
+    Persistent Memory Engine for Qutato.
+    Saves and loads facts from a local JSON database.
     """
-    def __init__(self):
+    def __init__(self, db_path: str = "qutato_memory.json"):
+        self.db_path = db_path
         self.memories: List[Fact] = []
+        self._load()
+
+    def _load(self):
+        if os.path.exists(self.db_path):
+            with open(self.db_path, "r") as f:
+                data = json.load(f)
+                self.memories = [Fact(**item) for item in data]
+
+    def _save(self):
+        with open(self.db_path, "w") as f:
+            json.dump([m.to_dict() for m in self.memories], f, indent=2)
 
     def store(self, text: str, metadata: Optional[Dict] = None):
-        """Add a new fact to memory."""
+        """Add a new fact and persist to disk."""
         fact = Fact(text, metadata)
         self.memories.append(fact)
-        # Note: In production, this would involve embedding generation and vector storage.
-        print(f"[Memory] Stored fact: '{text[:50]}...'")
+        self._save()
+        print(f"[Memory] Persisted fact: '{text[:50]}...'")
 
     def retrieve(self, query: str, limit: int = 3) -> List[str]:
-        """
-        Retrieve relevant context for a query.
-        (Simple keyword-based matching for the Open-Core version)
-        """
-        # Enterprise version uses Vector Search / Embeddings
         keywords = query.lower().split()
         scored_memories = []
         
@@ -36,14 +48,12 @@ class QutatoMemory:
             if score > 0:
                 scored_memories.append((score, fact.text))
         
-        # Sort by score and then by most recent
         scored_memories.sort(key=lambda x: x[0], reverse=True)
-        results = [text for score, text in scored_memories[:limit]]
-        
-        return results
+        return [text for score, text in scored_memories[:limit]]
 
     def clear(self):
         self.memories = []
+        if os.path.exists(self.db_path):
+            os.remove(self.db_path)
 
-# Global memory instance for the core
 memory_engine = QutatoMemory()
