@@ -26,9 +26,9 @@ def main():
     subparsers.add_parser("forget", help="Wipe the Qutato Memory")
 
     # Command: budget
-    budget_parser = subparsers.add_parser("budget", help="View or set daily spending cap")
-    budget_parser.add_argument("--set", type=float, help="Set daily limit in USD (e.g. --set 5.00)")
-    budget_parser.add_argument("--reset", action="store_true", help="Reset today's spending")
+    budget_parser = subparsers.add_parser("budget", help="View or set daily token cap")
+    budget_parser.add_argument("--set-tokens", type=int, help="Set daily limit in tokens (e.g. --set-tokens 500000)")
+    budget_parser.add_argument("--reset", action="store_true", help="Reset today's token count")
 
     # Command: update
     subparsers.add_parser("update", help="Update Qutato to the latest version")
@@ -45,7 +45,7 @@ def main():
         print(f"Memory Health: Optimized")
         print(f"Known Facts:   {count}")
         print(f"Quota Saved:   {saved_calls} requests (~{saved_tokens} tokens)")
-        print(f"Daily Budget:  {budget['spent_today']} / {budget['daily_limit']} ({budget['remaining']} left)")
+        print(f"Daily Budget:  {budget['tokens_today']:,} / {budget['daily_token_limit']:,} tokens ({budget['remaining_tokens']:,} left)")
         print(f"Requests Today:{budget['requests_today']}")
         print(f"Loops Killed:  {loops['total_loops_killed']}")
         print(f"DB Path:       {memory_engine.db_path}")
@@ -71,24 +71,22 @@ def main():
         print("🧹 Brain wiped. Qutato is now a blank slate.")
 
     elif args.command == "budget":
-        if args.set is not None:
-            budget_manager.set_daily_limit(args.set)
+        if args.set_tokens is not None:
+            budget_manager.set_token_limit(args.set_tokens)
         elif args.reset:
-            budget_manager._data["spent_today_usd"] = 0.0
             budget_manager._data["tokens_today"] = 0
             budget_manager._data["requests_today"] = 0
             budget_manager._data["blocked_today"] = 0
             budget_manager._save()
-            print("🔄 Today's spending has been reset to $0.00")
+            print("🔄 Today's token usage has been reset to 0.")
         else:
             b = budget_manager.get_status()
-            print(f"--- Qutato Budget ---")
-            print(f"Daily Limit:    {b['daily_limit']}")
-            print(f"Spent Today:    {b['spent_today']}")
-            print(f"Remaining:      {b['remaining']}")
-            print(f"Tokens Today:   {b['tokens_today']}")
-            print(f"Requests Today: {b['requests_today']}")
-            print(f"Blocked Today:  {b['blocked_today']}")
+            print(f"--- Qutato Token Budget ---")
+            print(f"Daily Limit:      {b['daily_token_limit']:,} tokens")
+            print(f"Tokens Used:      {b['tokens_today']:,} tokens")
+            print(f"Remaining:        {b['remaining_tokens']:,} tokens")
+            print(f"Requests Today:   {b['requests_today']}")
+            print(f"Blocked Today:    {b['blocked_today']}")
 
     elif args.command == "update":
         from qutato_core.engine.logo import print_logo

@@ -76,11 +76,12 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
                 )
 
             # 5. Budget Check
-            model = data.get("model", "default")
-            if not budget_manager.can_spend(model, estimated_tokens=500):
+            # Check if there are enough tokens left for the estimated 500
+            if not budget_manager.can_spend(estimated_tokens=500):
+                remaining = budget_manager.get_status()['remaining_tokens']
                 raise HTTPException(
                     status_code=403,
-                    detail=f"Daily budget limit reached. Spent: {budget_manager.get_status()['spent_today']}"
+                    detail=f"Daily token limit reached. You only have {remaining:,} tokens left today."
                 )
 
             # Auto-elevate sensitivity if keywords detected
@@ -94,9 +95,9 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
             additional_args={"user_id": user_id, "sensitive": sensitive}
         )
         
-        # 6. Log Actual Spend if successful
+        # 6. Log Actual Token Spend if successful
         tokens_used = response.get("usage", {}).get("total_tokens", 500)
-        budget_manager.log_spend(model, tokens_used)
+        budget_manager.log_spend(tokens_used)
         
         return response
     except HTTPException as e:

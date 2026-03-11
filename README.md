@@ -84,7 +84,7 @@ qutato status
 
 ## Highlights
 
-- **[Daily Budget Cap](#budget-manager)** — Prevent "bill shock." Set a daily limit (e.g., $5) and Qutato blocks all further LLM calls once reached.
+- **[Daily Budget Cap](#budget-manager)** — Prevent runaway local agents. Set a daily token limit (e.g., 500,000) and Qutato blocks all further LLM calls once reached.
 - **[Agent Loop Detector](#loop-detector)** — Auto-kills runaway agent loops. If an agent repeats the same action 3 times, Qutato stops it to save your budget.
 - **[Input Guardrails](#input-guardrails)** — Junk detection, keyboard mashing filter, sensitive keyword flagging. Blocks bad prompts before they cost you tokens.
 - **[Persistent Memory Brain](#memory-engine)** — A "Second Brain" for agents that stores facts and recalls context across sessions.
@@ -106,10 +106,10 @@ qutato status
 ### Trust + safety
 
 #### Budget Manager (Solo Builder's Shield) 💰
-- **Daily Cap:** Set a maximum dollar amount you're willing to spend each day.
-- **Cost Tracking:** Qutato estimates the cost of every request (GPT-4o, Claude, Gemini, etc.) in real-time.
+- **Daily Cap:** Set a maximum number of tokens your agents are allowed to use each day.
+- **Volume Tracking:** Focuses on raw token volume and request counts, perfect for local models (Ollama).
 - **Auto-Reset:** Resets at midnight local time automatically.
-- **CLI Commands:** `qutato budget --set 5.00`, `qutato budget --reset`.
+- **CLI Commands:** `qutato budget --set-tokens 500000`, `qutato budget --reset`.
 
 ### Loop Detector 🔄
 - **Auto-Kill:** Detects when an agent is repeating the same prompt/logic in a loop.

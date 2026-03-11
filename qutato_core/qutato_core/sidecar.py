@@ -37,7 +37,7 @@ import json
 class QutaoSidecar:
     """Direct Python integration for AI agents — no HTTP needed."""
 
-    def is_safe(self, prompt: str, model: str = "default") -> bool:
+    def is_safe(self, prompt: str) -> bool:
         """Full safety check: junk + loop + budget. Returns True if safe."""
         # 1. Check for junk
         report = prompt_detector.analyze_prompt(prompt)
@@ -52,7 +52,7 @@ class QutaoSidecar:
             return False
 
         # 3. Check budget
-        if not budget_manager.can_spend(model):
+        if not budget_manager.can_spend(estimated_tokens=500):
             return False
 
         if report["is_sensitive"]:
@@ -76,17 +76,17 @@ class QutaoSidecar:
         quota_manager.log_savings(user_id, estimated_tokens=tokens)
         print(f"💰 [Qutato Sidecar] Logged saving: {tokens} tokens")
 
-    def log_spend(self, model: str = "default", tokens: int = 500) -> None:
+    def log_spend(self, tokens: int = 500) -> None:
         """Log actual token spending after an LLM call."""
-        budget_manager.log_spend(model, tokens)
+        budget_manager.log_spend(tokens)
 
     def budget(self) -> dict:
         """Get current budget status."""
         return budget_manager.get_status()
 
-    def set_budget(self, daily_limit_usd: float) -> None:
-        """Set the daily spending cap."""
-        budget_manager.set_daily_limit(daily_limit_usd)
+    def set_budget(self, daily_limit_tokens: int) -> None:
+        """Set the daily token cap."""
+        budget_manager.set_token_limit(daily_limit_tokens)
 
     def status(self) -> dict:
         """Get Qutato's full status as a dictionary."""
