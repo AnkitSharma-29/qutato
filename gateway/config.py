@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    # App Config
-    APP_NAME: str = "Qutato Gateway"
+    # Qutato Core Config
+    APP_NAME: str = "Qutato Smart Core"
     DEBUG: bool = True
     
     # Security

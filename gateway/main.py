@@ -5,9 +5,8 @@ import uvicorn
 from gateway.config import settings
 from gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
 
-# Qutato Gateway: A pure Trust & Abstention layer.
-# Users provide their own LLM API keys. 
-# We provide the safety logic and quota management for the LAYER itself.
+# Qutato Smart Core: The definitive Trust & Abstention platform.
+# This engine hides provider complexity and ensures mathematical safety.
 
 app = FastAPI(title=settings.APP_NAME)
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=True)
