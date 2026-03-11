@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/qutato_logo.png" width="400" alt="Qutato Logo">
+</p>
+
 # Qutato: The Smart Core Trust Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
