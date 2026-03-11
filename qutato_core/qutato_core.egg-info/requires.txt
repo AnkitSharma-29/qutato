@@ -1,0 +1,4 @@
+numpy
+httpx
+pydantic
+pydantic-settings
