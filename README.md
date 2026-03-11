@@ -12,6 +12,12 @@
 
 Unlike traditional proxies, Qutato uses **Adaptive Thresholding** and **Persistent Memory** to eliminate hallucinations, manage quotas, and ensure adversarial security—all while maintaining sub-millisecond overhead.
 
+### 🛡️ Privacy-First & Local-Only
+Qutato is designed to run **on your own machine**. 
+*   **No Data Exfiltration:** Your LLM keys, prompts, and memories never leave your infrastructure. 
+*   **Run Anywhere:** Works on Windows, macOS, and Linux. 
+*   **Zero Dependencies:** The `qutato-core` module is a pure Python implementation that requires no external servers.
+
 ---
 
 ## 🚀 Key Features
@@ -21,6 +27,7 @@ Unlike traditional proxies, Qutato uses **Adaptive Thresholding** and **Persiste
 *   **Contextual Memory Engine:** A "Second Brain" for agents that tracks facts and updates context over time.
 *   **Universal Compatibility:** Supports 100+ LLMs (OpenAI, Gemini, Anthropic, Mistral, Llama, etc.).
 *   **Production-Ready CLI:** Manage facts, health, and recall directly from your terminal.
+*   **💰 Quota Optimization:** Intercept "junk" or out-of-scope prompts *before* they hit expensive LLMs, saving 100% of the token cost for useless inputs.
 *   **Sub-Millisecond Speed:** Verified average overhead of **0.022 ms**.
 
 ---

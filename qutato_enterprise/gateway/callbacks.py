@@ -26,8 +26,8 @@ def pre_call_abstention_callback(kwargs):
     )
     
     if should_abstain:
-        # Note: In a real LiteLLM callback, we might want to return a specific response object
-        # for simplicity in this proxy, we can raise a custom exception that main.py catches
+        # Log the quota saved by not sending this to the LLM
+        quota_manager.log_savings(user_id)
         raise Exception(f"ABSTAIN: Confidence too low ({mock_confidence} < {threshold})")
 
 def post_call_success_callback(kwargs):

@@ -24,9 +24,12 @@ def main():
 
     if args.command == "status":
         count = len(memory_engine.memories)
+        saved_calls, saved_tokens = quota_manager.get_savings("default_user")
+        
         print(f"--- Qutato Smart Core Status ---")
         print(f"Memory Health: Optimized")
         print(f"Known Facts:   {count}")
+        print(f"Quota Saved:   {saved_calls} requests (~{saved_tokens} tokens)")
         print(f"DB Path:       {memory_engine.db_path}")
 
     elif args.command == "learn":
