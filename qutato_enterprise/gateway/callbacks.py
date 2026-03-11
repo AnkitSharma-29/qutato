@@ -1,6 +1,6 @@
 import litellm
 from qutato_core.engine.abstention import abstention_engine
-from qutato_enterprise.gateway.quota_manager import quota_manager
+from qutato_core.engine.quota import quota_manager
 from fastapi import HTTPException
 
 def pre_call_abstention_callback(kwargs):
@@ -27,8 +27,11 @@ def pre_call_abstention_callback(kwargs):
     
     if should_abstain:
         # Log the quota saved by not sending this to the LLM
+        print(f"🛑 [Qutato] Confidence below threshold ({mock_confidence:.2f} < {threshold:.2f}). ABSTAINING (Saving Quota).")
         quota_manager.log_savings(user_id)
         raise Exception(f"ABSTAIN: Confidence too low ({mock_confidence} < {threshold})")
+    
+    print(f"✅ [Qutato] Trust Verified. Proceeding to LLM call.")
 
 def post_call_success_callback(kwargs):
     """

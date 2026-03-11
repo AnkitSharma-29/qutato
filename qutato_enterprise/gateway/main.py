@@ -50,8 +50,11 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
             from qutato_core.engine.detector import prompt_detector
             report = prompt_detector.analyze_prompt(last_prompt)
             
+            print(f"🔍 [Qutato] Vetting Input: '{last_prompt[:50]}...'")
+            
             if report["is_junk"]:
-                from qutato_enterprise.gateway.quota_manager import quota_manager
+                print(f"🚫 [Qutato] Blocked JUNK input. Saving quota.")
+                from qutato_core.engine.quota import quota_manager
                 quota_manager.log_savings(user_id, estimated_tokens=10) # Log junk interception
                 raise HTTPException(
                     status_code=400, 

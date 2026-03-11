@@ -2,6 +2,7 @@ pyproject.toml
 qutato_core/__init__.py
 qutato_core/agent_example.py
 qutato_core/cli.py
+qutato_core/config.py
 qutato_core/memory_demo.py
 qutato_core.egg-info/PKG-INFO
 qutato_core.egg-info/SOURCES.txt
@@ -12,3 +13,4 @@ qutato_core.egg-info/top_level.txt
 qutato_core/engine/abstention.py
 qutato_core/engine/detector.py
 qutato_core/engine/memory.py
+qutato_core/engine/quota.py

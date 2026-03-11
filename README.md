@@ -54,6 +54,22 @@ Because Qutato is **OpenAI-Compatible**, you can use it to protect your developm
 
 ---
 
+### 🏠 Local LLM & IDE Extension Support
+Qutato is designed to be the "Universal Trust Gateway" for your local machine.
+
+#### 1. Running with Local Models (Ollama/LM Studio)
+If you run models locally, Qutato can still vet them. Point your request to the Gateway and specify the provider:
+*   **Model Name:** `ollama/llama3`, `lm_studio/model`, or `openai/localhost:11434`
+*   **Benefit:** Qutato provides Guardrails and Memory even for 100% offline models.
+
+#### 2. Using with VS Code / IDE Extensions
+Most AI extensions (like **Roo Code**, **Continue**, or **Cursor**) support "OpenAI Compatible" endpoints.
+*   **Base URL:** `http://localhost:8000/v1`
+*   **API Key:** `qutato_admin_secret_key`
+*   **Supervisor Mode:** Qutato acts as a transparent proxy, filtering every response before it reaches your editor.
+
+---
+
 ## 🛠️ Quick Start
 
 ### 1. Installation
@@ -70,10 +86,10 @@ pip install -r qutato_enterprise/requirements.txt
 $env:PYTHONPATH = "." ; python qutato_enterprise/gateway/main.py
 ```
 
-### 3. Use the CLI
+### 3. Use the Global CLI
 ```bash
-python qutato_enterprise/cli.py learn "Qutato HQ is the center of trust."
-python qutato_enterprise/cli.py recall "HQ"
+qutato learn "Qutato HQ is the center of trust."
+qutato status
 ```
 
 ---
