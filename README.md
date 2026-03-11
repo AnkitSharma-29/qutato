@@ -220,6 +220,28 @@ Point your request to the Gateway and specify the provider:
 - **Model Name:** `ollama/llama3`, `lm_studio/model`, or `openai/localhost:11434`
 - **Benefit:** Qutato provides Guardrails and Memory even for 100% offline models.
 
+### CrewAI (Multi-Agent Framework)
+Qutato is the ultimate Trust Layer for multi-agent systems like [CrewAI](https://github.com/crewAIInc/crewAI). You can route an entire crew of autonomous agents through Qutato by setting the LLM `base_url`:
+
+```python
+from crewai import Agent, Task, Crew
+from langchain_openai import ChatOpenAI
+
+# Point your CrewAI agents to the Qutato Gateway
+qutato_llm = ChatOpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="qutato_admin_secret_key",
+    model="gpt-4o"
+)
+
+researcher = Agent(
+    role="Researcher",
+    goal="Find facts",
+    backstory="You are an AI researcher.",
+    llm=qutato_llm
+)
+```
+
 ### Antigravity Agent
 Use the Sidecar SDK for direct Python integration:
 
