@@ -94,16 +94,26 @@ def main():
     elif args.command == "update":
         from qutato_core.engine.logo import print_logo
         import subprocess
+        import os
+        import qutato_core
+        
+        # Find where Qutato is installed from (the root git clone directory)
+        install_dir = os.path.dirname(os.path.dirname(os.path.abspath(qutato_core.__file__)))
+        
         print_logo()
-        print("📥 Pulling latest updates from GitHub...")
+        print(f"📥 Pulling latest updates from GitHub into: {install_dir}")
         try:
-            # Assumes the user installed via git clone
-            result = subprocess.run(["git", "pull", "origin", "main"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["git", "pull", "origin", "main"], 
+                cwd=install_dir, 
+                capture_output=True, 
+                text=True
+            )
             if result.returncode == 0:
                 print("✅ Update successful!")
                 print(result.stdout)
             else:
-                print("❌ Update failed.")
+                print("❌ Update failed. Are you sure you installed via git clone?")
                 print(result.stderr)
         except Exception as e:
             print(f"❌ Error during update: {e}")

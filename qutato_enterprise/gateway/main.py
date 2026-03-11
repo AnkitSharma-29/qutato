@@ -24,6 +24,16 @@ def verify_qutato_key(api_key: str = Depends(api_key_header)):
         )
     return api_key
 
+@app.get("/")
+def read_root():
+    """Health check for users who open localhost:8000 in their browser."""
+    return {
+        "status": "online",
+        "message": "🛡️ Qutato Gateway is running. The Smart Core Trust Platform is active.",
+        "version": __version__,
+        "docs_url": "http://localhost:8000/docs"
+    }
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": settings.APP_NAME}
