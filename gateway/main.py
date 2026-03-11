@@ -1,19 +1,23 @@
-import os
 from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.security import APIKeyHeader
-from litellm import completion
+import litellm
 import uvicorn
 from gateway.config import settings
+from gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
+
+# Qutato Gateway: A pure Trust & Abstention layer.
+# Users provide their own LLM API keys. 
+# We provide the safety logic and quota management for the LAYER itself.
 
 app = FastAPI(title=settings.APP_NAME)
-
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=True)
 
-def verify_api_key(api_key: str = Depends(api_key_header)):
+def verify_qutato_key(api_key: str = Depends(api_key_header)):
+    """Verifies that the user has a valid Qutato subscription/key."""
     if api_key != settings.ADMIN_API_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API Key"
+            detail="Invalid Qutato API Key"
         )
     return api_key
 
@@ -22,53 +26,53 @@ async def health_check():
     return {"status": "healthy", "service": settings.APP_NAME}
 
 @app.post("/v1/chat/completions")
-async def chat_completions(request: Request, api_key: str = Depends(verify_api_key)):
+async def chat_completions(request: Request, q_api_key: str = Depends(verify_qutato_key)):
     try:
         data = await request.json()
-        user_id = data.get("user_id", "default_user")
         
-        # 1. Quota Check
-        if not quota_manager.check_quota(user_id):
+        # 1. Extract LLM API Key from headers or body
+        # Preference: Header 'X-LLM-API-KEY' or 'Authorization'
+        llm_api_key = request.headers.get("X-LLM-API-KEY") or data.get("api_key")
+        
+        if not llm_api_key:
             raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Quota exceeded. Please upgrade your plan."
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Missing LLM API Key. Please provide 'X-LLM-API-KEY' header or 'api_key' in body."
             )
         
-        # 2. Abstention Logic (Placeholder for model confidence/urgency analysis)
-        # In a real scenario, we might run a fast 'prober' model here first.
-        mock_confidence = 0.7  # Imagine this comes from a prober
-        is_sensitive = data.get("sensitive", False)
+        # 2. Prepare request for LiteLLM
+        user_id = data.get("user_id", "default_user")
+        sensitive = data.get("sensitive", False)
         
-        should_abstain, threshold = abstention_engine.should_abstain(
-            model_confidence=mock_confidence,
-            task_urgency=0.5,
-            sensitivity_score=1.0 if is_sensitive else 0.0
+        # liteLLM acompletion call
+        # Callbacks (registered in callbacks.py) will handle Abstention and Quota logic
+        response = await litellm.acompletion(
+            **data,
+            api_key=llm_api_key,
+            additional_args={"user_id": user_id, "sensitive": sensitive}
         )
         
-        if should_abstain:
+        return response
+    except Exception as e:
+        # Check if the error was a triggered Abstention
+        if "ABSTAIN" in str(e):
             return {
                 "id": "abstain-123",
                 "object": "chat.completion",
                 "choices": [{
                     "message": {
                         "role": "assistant",
-                        "content": "I must abstain from answering this. Confidence too low or sensitivity too high."
+                        "content": str(e)
                     },
                     "finish_reason": "abstention"
                 }],
-                "usage": {"total_tokens": 0},
-                "abstention_threshold": threshold
+                "usage": {"total_tokens": 0}
             }
         
-        # 3. Forward to LiteLLM
-        response = completion(**data)
-        
-        # 4. Record Usage
-        total_tokens = response.get("usage", {}).get("total_tokens", 0)
-        quota_manager.increment_usage(user_id, total_tokens)
-        
-        return response
-    except Exception as e:
+        # Handle Rate Limit / Quota Exceeded from callbacks
+        if "Quota exceeded" in str(e) or "429" in str(e):
+            raise HTTPException(status_code=429, detail=str(e))
+            
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

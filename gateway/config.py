@@ -16,10 +16,6 @@ class Settings(BaseSettings):
     # LLM Settings
     DEFAULT_THRESHOLD: float = 0.85
     
-    # Provider Keys (Load from .env)
-    OPENAI_API_KEY: Optional[str] = None
-    GEMINI_API_KEY: Optional[str] = None
-    
     class Config:
         env_file = ".env"
 
