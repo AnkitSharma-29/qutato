@@ -18,9 +18,22 @@ class AbstentionEngine:
         dynamic_threshold = self.base_threshold + (alpha * sensitivity) - (beta * urgency)
         return np.clip(dynamic_threshold, 0.0, 1.0)
 
-    def should_abstain(self, model_confidence, task_urgency, sensitivity_score):
+    def should_abstain(self, 
+                       model_confidence, 
+                       task_urgency, 
+                       sensitivity_score,
+                       has_memory_match=False):
+        """
+        Calculate adaptive threshold and decide whether to abstain.
+        Enhanced with Memory Context: If memory has a match, we can trust the model more.
+        """
         threshold = self.calculate_adaptive_threshold(model_confidence, task_urgency, sensitivity_score)
         
+        # Memory Offset: If we have context, lower the threshold (make it easier to say yes)
+        if has_memory_match:
+            threshold -= 0.15 # 15% boost to trust
+            threshold = max(0.1, threshold) # Cap at 0.1
+            
         return model_confidence < threshold, threshold
 
 # Singleton for the engine
