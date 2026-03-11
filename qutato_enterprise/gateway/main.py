@@ -73,6 +73,9 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
         )
         
         return response
+    except HTTPException as e:
+        # Re-raise HTTPExceptions (like our 400 Junk blocks) so they return correctly
+        raise e
     except Exception as e:
         # Check if the error was a triggered Abstention
         if "ABSTAIN" in str(e):

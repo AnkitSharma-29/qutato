@@ -68,9 +68,22 @@ Most AI extensions (like **Roo Code**, **Continue**, or **Cursor**) support "Ope
 *   **API Key:** `qutato_admin_secret_key`
 *   **Supervisor Mode:** Qutato acts as a transparent proxy, filtering every response before it reaches your editor.
 
----
-
-## 🛠️ Quick Start
+#### 3. OpenClaw Integration 🦞
+Qutato is 100% compatible with **OpenClaw**. You can use Qutato to vet all the messages sent through OpenClaw's various channels (WhatsApp, Slack, Telegram, etc.).
+*   **The Setup:** In your `~/.openclaw/openclaw.json`, add a custom provider pointing to Qutato:
+    ```json
+    {
+      "models": {
+        "providers": {
+          "qutato": {
+            "baseUrl": "http://localhost:8000/v1",
+            "apiKey": "qutato_admin_secret_key"
+          }
+        }
+      }
+    }
+    ```
+*   **The Benefit:** Now, Qutato secures your personal AI assistant. No matter which messaging app you use, Qutato vets the AI's response before it's sent to you.
 
 ### 1. Installation
 ```bash

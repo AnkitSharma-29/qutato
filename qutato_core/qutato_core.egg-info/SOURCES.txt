@@ -4,6 +4,7 @@ qutato_core/agent_example.py
 qutato_core/cli.py
 qutato_core/config.py
 qutato_core/memory_demo.py
+qutato_core/sidecar.py
 qutato_core.egg-info/PKG-INFO
 qutato_core.egg-info/SOURCES.txt
 qutato_core.egg-info/dependency_links.txt
