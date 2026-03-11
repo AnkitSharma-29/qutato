@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException, Request, Depends, status
 from fastapi.security import APIKeyHeader
 import litellm
 import uvicorn
-from gateway.config import settings
-from gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
+from qutato_enterprise.gateway.config import settings
+from qutato_enterprise.gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
 
 # Qutato Smart Core: The definitive Trust & Abstention platform.
 # This engine hides provider complexity and ensures mathematical safety.

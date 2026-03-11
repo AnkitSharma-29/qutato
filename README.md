@@ -1,14 +1,36 @@
 # Qutato: The Smart Core Trust Platform
 
-Qutato is a high-performance, standalone "Smart Core" for LLM infrastructure. It acts as the definitive trust layer, providing mathematical Abstention (anti-hallucination) and Quota governance while abstracting away underlying model providers.
+Qutato is the definitive enterprise trust layer for Large Language Models. It provides a dual-tiered architecture for maximum flexibility and performance.
 
-## Key Features
+## Project Structure
 
-- **Mathematical Abstention**: Forces LLMs to stay within their knowledge boundaries.
-- **BYOK (Bring Your Own Key)**: Users provide their own LLM keys; Qutato provides the intelligence.
-- **Quota Governance**: Redis-backed sub-millisecond tracking to prevent budget waste.
-- **Universal Interface**: A single, clean API for all AI operations.
+### 1. [Qutato-Core](./qutato_core) (Open-Source Module)
+A lightweight Python package for developers to integrate Abstention and local quota governance directly into their applications.
+- **Mathematical Abstention**: Adaptive Thresholding for hallucination prevention.
+- **Local Quota Control**: Budget management at the source.
 
-- **Gateway**: FastAPI proxy using LiteLLM for universal provider support.
-- **Engine**: Core Abstention logic and Adversarial Probing.
-- **Quota Manager**: Redis-backed sub-millisecond tracking.
+### 2. [Qutato-Enterprise](./qutato_enterprise) (Hosted Gateway)
+A production-grade, high-performance API gateway for large-scale deployments.
+- **BYOK (Bring Your Own Key)**: Full data and cost ownership.
+- **Global Governance**: Redis-backed sub-millisecond tracking across teams.
+- **Elite Routing**: LiteLLM-powered failover and load balancing.
+
+---
+
+## Getting Started
+
+### For Developers (Standalone Module)
+```bash
+pip install -e ./qutato_core
+```
+
+### For Teams (Enterprise Gateway)
+```bash
+cd qutato_enterprise
+docker-compose up -d redis
+pip install -r requirements.txt
+python -m gateway.main
+```
+
+## Repository
+Final platform core: `https://github.com/AnkitSharma-29/qutato.git`

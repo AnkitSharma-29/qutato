@@ -1,6 +1,6 @@
 import litellm
-from engine.abstention import abstention_engine
-from gateway.quota_manager import quota_manager
+from qutato_core.engine.abstention import abstention_engine
+from qutato_enterprise.gateway.quota_manager import quota_manager
 from fastapi import HTTPException
 
 def pre_call_abstention_callback(kwargs):
