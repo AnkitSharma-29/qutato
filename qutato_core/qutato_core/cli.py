@@ -33,6 +33,9 @@ def main():
     # Command: update
     subparsers.add_parser("update", help="Update Qutato to the latest version")
 
+    # Command: commands
+    subparsers.add_parser("commands", help="List all available Qutato commands")
+
     args = parser.parse_args()
 
     if args.command == "status":
@@ -105,7 +108,26 @@ def main():
         except Exception as e:
             print(f"❌ Error during update: {e}")
 
+    elif args.command == "commands":
+        from qutato_core.engine.logo import print_logo
+        print_logo()
+        print("--- 🛡️ Qutato Command Reference ---\n")
+        print("Usage: qutato <command> [options]\n")
+        print("Commands:")
+        print("  status    View real-time savings, budget, and memory health")
+        print("  budget    View or manage your daily token cap")
+        print("            - qutato budget --set-tokens 500000")
+        print("            - qutato budget --reset")
+        print("  learn     Store a new fact in the Qutato Brain")
+        print("            - qutato learn \"The deadline is Friday\"")
+        print("  recall    Search the Brain for context")
+        print("            - qutato recall \"deadline\"")
+        print("  forget    Wipe the entire memory brain")
+        print("  update    Pull the latest Qutato updates from GitHub")
+        print("  commands  Show this custom help menu\n")
+
     else:
+        # Fallback to standard argparse help
         parser.print_help()
 
 if __name__ == "__main__":
