@@ -2,6 +2,12 @@ import argparse
 import sys
 from qutato_core.engine.memory import memory_engine
 
+try:
+    from qutato_enterprise.gateway.quota_manager import quota_manager
+    HAS_ENTERPRISE = True
+except ImportError:
+    HAS_ENTERPRISE = False
+
 def main():
     parser = argparse.ArgumentParser(description="Qutato Management CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -24,7 +30,9 @@ def main():
 
     if args.command == "status":
         count = len(memory_engine.memories)
-        saved_calls, saved_tokens = quota_manager.get_savings("default_user")
+        saved_calls, saved_tokens = (0, 0)
+        if HAS_ENTERPRISE:
+            saved_calls, saved_tokens = quota_manager.get_savings("default_user")
         
         print(f"--- Qutato Smart Core Status ---")
         print(f"Memory Health: Optimized")

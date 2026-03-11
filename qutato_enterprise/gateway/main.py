@@ -43,8 +43,26 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
         user_id = data.get("user_id", "default_user")
         sensitive = data.get("sensitive", False)
         
+        # 3. Prompt Vetting (Input Guardrails)
+        messages = data.get("messages", [])
+        if messages:
+            last_prompt = messages[-1].get("content", "")
+            from qutato_core.engine.detector import prompt_detector
+            report = prompt_detector.analyze_prompt(last_prompt)
+            
+            if report["is_junk"]:
+                from qutato_enterprise.gateway.quota_manager import quota_manager
+                quota_manager.log_savings(user_id, estimated_tokens=10) # Log junk interception
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Junk input detected. Qutato blocked this to save your quota."
+                )
+            
+            # Auto-elevate sensitivity if keywords detected
+            if report["is_sensitive"]:
+                sensitive = True
+
         # liteLLM acompletion call
-        # Callbacks (registered in callbacks.py) will handle Abstention and Quota logic
         response = await litellm.acompletion(
             **data,
             api_key=llm_api_key,

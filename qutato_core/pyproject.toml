@@ -17,3 +17,6 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/AnkitSharma-29/qutato"
+
+[project.scripts]
+qutato = "qutato_core.cli:main"

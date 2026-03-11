@@ -17,7 +17,12 @@ class QutatoMemory:
     Persistent Memory Engine for Qutato.
     Saves and loads facts from a local JSON database.
     """
-    def __init__(self, db_path: str = "qutato_memory.json"):
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            home = os.path.expanduser("~")
+            qutato_dir = os.path.join(home, ".qutato")
+            os.makedirs(qutato_dir, exist_ok=True)
+            db_path = os.path.join(qutato_dir, "qutato_memory.json")
         self.db_path = db_path
         self.memories: List[Fact] = []
         self._load()
