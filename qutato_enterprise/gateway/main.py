@@ -1,16 +1,16 @@
-from fastapi import FastAPI, HTTPException, Request, Depends, status
+from fastapi import FastAPI, Depends, Header, HTTPException, Request, status
 from fastapi.security import APIKeyHeader
+from fastapi.responses import JSONResponse
 import litellm
 import uvicorn
+import os
 from qutato_enterprise.gateway.config import settings
 from qutato_enterprise.gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
 from qutato_core.engine.budget import budget_manager
 from qutato_core.engine.loop_detector import loop_detector
-from qutato_core.engine.updater import print_update_notification
+from qutato_core.engine.updater import check_for_updates
 from qutato_core.version import __version__
-from qutato_enterprise.gateway.translator import (
-    normalize, denormalize, detect_format,
-)
+from qutato_enterprise.gateway.translator import detect_format, normalize, denormalize
 
 # Qutato Smart Core: The definitive Trust & Abstention platform.
 # Universal Gateway — accepts OpenAI, Anthropic, Gemini, and Ollama formats.
@@ -302,6 +302,9 @@ if __name__ == "__main__":
     print_logo()
     print(f"🚀 [Qutato] Starting Universal Gateway v{__version__}...")
     print(f"🌐 [Qutato] Supported formats: {', '.join(SUPPORTED_FORMATS.keys())}")
-    # Check for updates on startup (non-blocking)
-    print_update_notification()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Check for updates    # Start Server
+    try:
+        check_for_updates() # Check for updates (non-blocking)
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    except Exception as e:
+        print(f"❌ Failed to start Qutato Gateway: {e}")

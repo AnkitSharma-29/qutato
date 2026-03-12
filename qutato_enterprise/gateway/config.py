@@ -4,7 +4,7 @@ from typing import Optional, List
 class Settings(BaseSettings):
     # Qutato Core Config
     APP_NAME: str = "Qutato Smart Core"
-    DEBUG: bool = True
+    DEBUG: bool = False
     
     # Security
     ADMIN_API_KEY: str = "qutato_admin_secret_key"
