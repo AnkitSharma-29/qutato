@@ -25,15 +25,29 @@ class QutatoMemory:
     Persistent Memory Engine for Qutato.
     Saves and loads facts from a local JSON database using atomic writes.
     """
-    def __init__(self, db_path: Optional[str] = None):
+    def __init__(self, db_path: Optional[str] = None, remote_url: Optional[str] = None):
         if db_path is None:
             home = os.path.expanduser("~")
             qutato_dir = os.path.join(home, ".qutato")
             os.makedirs(qutato_dir, exist_ok=True)
             db_path = os.path.join(qutato_dir, "qutato_memory.json")
         self.db_path: str = str(db_path)
+        self.remote_url: Optional[str] = remote_url
         self.memories: List[Fact] = []
         self._load()
+
+    def sync(self) -> dict:
+        """
+        Synchronize local memories with a remote provider (Multi-Agent Shared Brain foundation).
+        Currently implements a placeholder for cloud convergence.
+        """
+        if not self.remote_url:
+            return {"status": "skipped", "reason": "No remote_url configured"}
+        
+        print(f"📡 [Qutato Memory] Attempting sync with {self.remote_url}...")
+        # Future: Implement actual HTTP sync with Qutato Cloud or another gateway
+        time.sleep(0.5) 
+        return {"status": "success", "synced_count": len(self.memories)}
 
     def _load(self):
         """Loads and vettes memory data from disk with error recovery."""

@@ -228,6 +228,18 @@ async def _process_request(
                 detail="Junk input detected. Qutato blocked this to save your quota."
             )
 
+        # --- 1.2 Adversarial Probing ---
+        from qutato_core.engine.adversarial_prober import adversarial_prober
+        adv_report = adversarial_prober.probe(last_prompt)
+        if adv_report["is_adversarial"]:
+            print(f"🛑 [Qutato] [{source_format.upper()}] Blocked ADVERSARIAL: {adv_report['matched_patterns']}")
+            from qutato_core.engine.quota import quota_manager
+            quota_manager.log_savings(user_id, estimated_tokens=100)
+            raise HTTPException(
+                status_code=403,
+                detail=f"Security Alert: Adversarial pattern detected ({adv_report['matched_patterns'][0]}). Access denied."
+            )
+
         # --- 2. Loop Detection ---
         if loop_detector.is_loop(last_prompt):
             print(f"🔄 [Qutato] Loop detected. Auto-killing request.")

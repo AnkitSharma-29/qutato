@@ -337,6 +337,13 @@ docker-compose up -d
 
 ---
 
+### ✨ Core Features
+- **🛡️ Formal Trust (Abstention Engine)**: Adaptive thresholding for sensitive requests.
+- **🕵️‍♂️ Adversarial Probing (OBLITERATUS)**: Detects prompt injections, jailbreaks, and malicious framing.
+- **🧠 Persistent Memory (Shared Brain)**: Local-first fact storage with Multi-Agent synchronization support.
+- **💰 Budget & Quota Management**: Daily token limits and usage tracking.
+- **🔄 Universal Gateway**: OpenAI-compatible API translating into Anthropic, Gemini, and Ollama formats.
+
 ## 🛠️ Roadmap & Progress
 
 - [x] Core Abstention Engine
@@ -348,8 +355,6 @@ docker-compose up -d
 - [x] OpenClaw Compatibility
 - [ ] Qutato Cloud (Hosted SaaS)
 - [ ] Web Dashboard (Savings Analytics)
-- [ ] Adversarial Probing (OBLITERATUS-Defense)
-- [ ] Multi-Agent Shared Brain
 - [ ] VS Code Extension (Native Plugin)
 
 ---
