@@ -1,9 +1,14 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, Request, status
 from fastapi.security import APIKeyHeader
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 import litellm
 import uvicorn
 import os
+import logging
+import datetime
+import json
+import uuid
 from qutato_enterprise.gateway.config import settings
 from qutato_enterprise.gateway.callbacks import pre_call_abstention_callback, post_call_success_callback
 from qutato_core.engine.budget import budget_manager
@@ -11,6 +16,9 @@ from qutato_core.engine.loop_detector import loop_detector
 from qutato_core.engine.updater import check_for_updates
 from qutato_core.version import __version__
 from qutato_enterprise.gateway.translator import detect_format, normalize, denormalize
+from typing import Union, Any, Dict
+from collections import deque
+import time
 
 # Qutato Smart Core: The definitive Trust & Abstention platform.
 # Universal Gateway — accepts OpenAI, Anthropic, Gemini, and Ollama formats.
@@ -40,6 +48,71 @@ SUPPORTED_FORMATS = {
 
 app = FastAPI(title=settings.APP_NAME)
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=True)
+
+# --- 1. CORS Middleware ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In strict production, replace with your domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- 2. Rate Limiting Middleware ---
+class RateLimiter:
+    """Simple in-memory sliding window rate limiter."""
+    def __init__(self, max_requests: int = 60, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.counts: Dict[str, deque] = {} # user_id -> deque of timestamps
+
+    def is_allowed(self, user_id: str) -> bool:
+        now = time.time()
+        if user_id not in self.counts:
+            self.counts[user_id] = deque()
+        
+        # Prune old timestamps
+        history = self.counts[user_id]
+        while history and history[0] < now - self.window_seconds:
+            history.popleft()
+        
+        if len(history) < self.max_requests:
+            history.append(now)
+            return True
+        return False
+
+rate_limiter = RateLimiter(max_requests=settings.DEBUG and 1000 or 100) # Increased limit for local dev
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Skip rate limiting for health checks and status
+    if request.url.path in ["/", "/v1/status", "/v1/formats"]:
+        return await call_next(request)
+
+    user_id = request.headers.get("user_id", "default")
+    if not rate_limiter.is_allowed(user_id):
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Too many requests. Qutato Rate Limiter active to protect local compute."}
+        )
+    return await call_next(request)
+
+# --- 3. Persistent Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(settings.LOG_FILE),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("qutato")
+
+def audit_log(user_id: str, action: str, detail: str = ""):
+    """Records an entry in the persistent qutato.log audit trail."""
+    timestamp = datetime.datetime.now().isoformat()
+    log_msg = f"user={user_id} action={action} {detail}"
+    logger.info(log_msg)
 
 
 def verify_qutato_key(api_key: str = Depends(api_key_header)):
@@ -73,6 +146,40 @@ async def health_check():
     return {"status": "healthy", "service": settings.APP_NAME}
 
 
+@app.get("/v1/status")
+async def get_status(q_api_key: str = Depends(verify_qutato_key)):
+    """Exposes the full Qutato status (budget, savings, facts) for external monitoring."""
+    from qutato_core.engine.memory import memory_engine
+    from qutato_core.engine.quota import quota_manager
+    from qutato_core.engine.budget import budget_manager
+    from qutato_core.engine.loop_detector import loop_detector
+    
+    try:
+        saved_calls, saved_tokens = quota_manager.get_total_savings()
+        budget = budget_manager.get_status()
+        loops = loop_detector.get_stats()
+        
+        return {
+            "status": "active",
+            "version": __version__,
+            "memory": {
+                "health": "Optimized",
+                "known_facts": len(memory_engine.memories),
+            },
+            "savings": {
+                "total_calls": saved_calls,
+                "total_tokens": saved_tokens
+            },
+            "budget": budget,
+            "loops": loops
+        }
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal Trust Layer Error: {str(e)}"}
+        )
+
+
 @app.get("/v1/formats")
 async def list_formats():
     """Discovery endpoint — lists all supported API formats and their endpoints."""
@@ -92,7 +199,7 @@ async def _process_request(
     llm_api_key: str,
     source_format: str,
     request: Request,
-) -> dict:
+) -> Union[dict, StreamingResponse]:
     """
     Core processing pipeline used by ALL format endpoints.
 
@@ -146,18 +253,51 @@ async def _process_request(
     # --- 4. LLM Call via LiteLLM ---
     # Strip non-LiteLLM keys before forwarding
     litellm_data = {k: v for k, v in data.items() if k not in ("user_id", "sensitive", "api_key")}
+    is_streaming = litellm_data.get("stream", False)
+
+    if is_streaming:
+        return await _handle_streaming_response(litellm_data, llm_api_key, user_id, sensitive, fmt=source_format)
 
     response = await litellm.acompletion(
         **litellm_data,
         api_key=llm_api_key,
-        additional_args={"user_id": user_id, "sensitive": sensitive}
+        extra_headers={"user_id": user_id, "sensitive": str(sensitive)}
     )
 
-    # --- 5. Log Actual Token Spend ---
+    # --- 5. Log Actual Token Spend (Non-streaming) ---
     tokens_used = response.get("usage", {}).get("total_tokens", 500)
     budget_manager.log_spend(tokens_used)
+    audit_log(user_id, "completion", f"tokens={tokens_used} model={data.get('model')}")
 
     return response
+
+async def _handle_streaming_response(litellm_data: dict, llm_api_key: str, user_id: str, sensitive: bool, fmt: str) -> StreamingResponse:
+    """Handles streaming responses from LiteLLM and bridges them to FastAPI."""
+    from qutato_enterprise.gateway.translator import denormalize_chunk
+    
+    async def stream_generator():
+        try:
+            response = await litellm.acompletion(
+                **litellm_data,
+                api_key=llm_api_key,
+                stream=True,
+                extra_headers={"user_id": user_id, "sensitive": str(sensitive)}
+            )
+            
+            # LiteLLM returns an async generator for stream=True
+            async for chunk in response:
+                # Denormalize each chunk to the target format if needed
+                if hasattr(chunk, "dict"):
+                    chunk_dict = chunk.dict()
+                    translated_chunk = denormalize_chunk(chunk_dict, fmt=fmt)
+                    yield f"data: {json.dumps(translated_chunk)}\n\n"
+            
+            yield "data: [DONE]\n\n"
+            audit_log(user_id, "stream_completion", f"model={litellm_data.get('model')} format={fmt}")
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
 
 def _extract_llm_key(request: Request, data: dict) -> str:
@@ -179,7 +319,7 @@ def _extract_llm_key(request: Request, data: dict) -> str:
 async def _handle_format_endpoint(
     request: Request,
     fmt: str,
-) -> dict:
+) -> Union[dict, StreamingResponse]:
     """
     Shared handler for all format-specific endpoints.
     Normalizes → processes → denormalizes.
@@ -194,6 +334,10 @@ async def _handle_format_endpoint(
 
         # Process through trust pipeline
         response = await _process_request(internal_data, llm_api_key, fmt, request)
+
+        # If it's a streaming response, return it directly
+        if isinstance(response, StreamingResponse):
+            return response
 
         # Denormalize back to caller's expected format
         output = denormalize(response, fmt=fmt)
@@ -245,6 +389,10 @@ async def chat_completions(request: Request, q_api_key: str = Depends(verify_qut
         internal_data = normalize(data, fmt=detected)
 
         response = await _process_request(internal_data, llm_api_key, detected, request)
+
+        # If streaming, return directly
+        if isinstance(response, StreamingResponse):
+            return response
 
         # If auto-detected a non-OpenAI format, denormalize back
         if detected != "openai":

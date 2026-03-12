@@ -23,9 +23,9 @@ def _make_internal(
     temperature: float | None = None,
     max_tokens: int | None = None,
     extra: dict | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Build a canonical internal request dict."""
-    req = {"model": model, "messages": messages, "stream": stream}
+    req: dict[str, Any] = {"model": model, "messages": messages, "stream": stream}
     if temperature is not None:
         req["temperature"] = temperature
     if max_tokens is not None:
@@ -196,8 +196,10 @@ def denormalize_to_anthropic(response: dict) -> dict:
     text = _get_response_text(response)
     usage = _get_usage(response)
 
+    raw_id = str(uuid.uuid4().hex)
+    msg_id = f"msg_{raw_id[:24]}"
     return {
-        "id": response.get("id", f"msg_{uuid.uuid4().hex[:24]}"),
+        "id": response.get("id", msg_id),
         "type": "message",
         "role": "assistant",
         "content": [{"type": "text", "text": text}],
@@ -248,7 +250,6 @@ def denormalize_to_ollama_chat(response: dict) -> dict:
         "prompt_eval_count": usage.get("prompt_tokens", 0),
     }
 
-
 def denormalize_to_ollama_generate(response: dict) -> dict:
     """Internal OpenAI response → Ollama /api/generate response."""
     text = _get_response_text(response)
@@ -263,6 +264,59 @@ def denormalize_to_ollama_generate(response: dict) -> dict:
         "eval_count": usage.get("completion_tokens", 0),
         "prompt_eval_count": usage.get("prompt_tokens", 0),
     }
+
+
+    return {
+        "model": response.get("model", ""),
+        "created_at": time.strftime("%Y-%m-%dT%H:%M:%S.000000Z", time.gmtime()),
+        "response": text,
+        "done": True,
+        "total_duration": 0,
+        "eval_count": usage.get("completion_tokens", 0),
+        "prompt_eval_count": usage.get("prompt_tokens", 0),
+    }
+
+
+# ===================================================================
+#  STREAMING DENORMALIZERS (chunk-by-chunk translation)
+# ===================================================================
+
+def denormalize_chunk(chunk: dict, fmt: str) -> dict:
+    """
+    Translates an OpenAI-style chunk into the target format.
+    """
+    delta = chunk.get("choices", [{}])[0].get("delta", {})
+    content = delta.get("content", "")
+    role = delta.get("role")
+    model = chunk.get("model", "")
+    
+    if fmt == "openai":
+        return chunk
+        
+    if fmt == "anthropic":
+        # Simplified Anthropic stream chunk
+        return {
+            "type": "content_block_delta",
+            "index": 0,
+            "delta": {"type": "text_delta", "text": content}
+        }
+        
+    if fmt == "gemini":
+        return {
+            "candidates": [{
+                "content": {"parts": [{"text": content}], "role": "model"},
+                "finishReason": "STOP" if not content else None
+            }]
+        }
+        
+    if fmt.startswith("ollama"):
+        return {
+            "model": model,
+            "message": {"role": role or "assistant", "content": content},
+            "done": False
+        }
+        
+    return chunk
 
 
 # ===================================================================

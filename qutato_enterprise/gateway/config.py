@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     
     # Security
+    # In production, ALWAYS set this via ADMIN_API_KEY environment variable.
     ADMIN_API_KEY: str = "qutato_admin_secret_key"
     
     # Redis Config
@@ -15,6 +16,9 @@ class Settings(BaseSettings):
     
     # LLM Settings
     DEFAULT_THRESHOLD: float = 0.85
+
+    # Logging
+    LOG_FILE: str = "qutato.log"
 
     # Universal Gateway — which API formats to enable
     ENABLED_FORMATS: List[str] = ["openai", "anthropic", "gemini", "ollama"]
