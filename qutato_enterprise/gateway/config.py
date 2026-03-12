@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, List
 
 class Settings(BaseSettings):
     # Qutato Core Config
@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     
     # LLM Settings
     DEFAULT_THRESHOLD: float = 0.85
+
+    # Universal Gateway — which API formats to enable
+    ENABLED_FORMATS: List[str] = ["openai", "anthropic", "gemini", "ollama"]
     
     class Config:
         env_file = ".env"

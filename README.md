@@ -10,7 +10,7 @@
 </pre>
 </p>
 
-# 🛡️ Qutato😂 — The Smart Core Trust Platform
+# 🛡️ Qutato😂 — The Universal AI Trust Gateway
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
@@ -18,6 +18,8 @@
 [![Open Source](https://img.shields.io/badge/Open-Source-brightgreen.svg)](https://github.com/AnkitSharma-29/qutato)
 
 Qutato is a local-first AI trust layer you run on your own machine. It sits between your applications and your LLM providers, vetting every request and response with mathematical precision. The Gateway is the control plane — the product is **trust**.
+
+> **Universal Gateway** — Qutato now speaks OpenAI, Anthropic, Gemini, and Ollama natively. Drop it into any tool, regardless of API format.
 
 If you want an AI safety layer that is fast, private, and always-on, this is it.
 
@@ -90,7 +92,7 @@ qutato status
 - **[Persistent Memory Brain](#memory-engine)** — A "Second Brain" for agents that stores facts and recalls context across sessions.
 - **[Quota Optimization](#quota-savings)** — Tracks every token you save. Shows your ROI in real-time.
 - **[Sidecar SDK](#sidecar-agent-sdk)** — Direct Python integration for any AI agent (no HTTP needed).
-- **[Universal Compatibility](#integrations)** — Works with OpenClaw, Roo Code, Continue, Ollama, LM Studio, and any OpenAI-compatible tool.
+- **[Universal Gateway](#universal-gateway)** — Native endpoints for OpenAI, Anthropic, Gemini, and Ollama. Auto-detects format. Works with any AI tool.
 - **[Global CLI](#cli-commands)** — `qutato` command available from any terminal, any directory.
 - **[Sub-Millisecond Speed](#performance)** — Verified overhead of **0.022 ms**. Invisible to the user.
 
@@ -99,7 +101,7 @@ qutato status
 ## Everything we built so far
 
 ### Core platform
-- **Gateway API** (`localhost:8000`) — OpenAI-compatible control plane for all LLM traffic. Handles auth, routing, vetting, and quota tracking.
+- **Universal Gateway API** (`localhost:8000`) — Multi-format control plane for all LLM traffic. Natively speaks OpenAI, Anthropic, Gemini, and Ollama. Handles auth, routing, vetting, and quota tracking.
 - **CLI surface:** `qutato status`, `qutato learn`, `qutato recall`, `qutato forget`.
 - **Persistent storage:** All data lives in `~/.qutato/` — portable, global, and private.
 
@@ -165,28 +167,93 @@ else:
 ## How it works (short)
 
 ```
-Your App / IDE Extension / AI Agent / OpenClaw / CLI
-                    │
-                    ▼
-    ┌───────────────────────────────┐
-    │       Qutato Gateway          │
-    │      (control plane)          │
-    │   http://localhost:8000/v1    │
-    │                               │
-    │  ┌─────────┐ ┌────────────┐  │
-    │  │ Input    │ │ Abstention │  │
-    │  │ Guards   │ │ Engine     │  │
-    │  └─────────┘ └────────────┘  │
-    │  ┌─────────┐ ┌────────────┐  │
-    │  │ Memory   │ │ Quota      │  │
-    │  │ Brain    │ │ Tracker    │  │
-    │  └─────────┘ └────────────┘  │
-    └──────────────┬────────────────┘
-                   │
-        ┌──────────┼──────────┐
-        ▼          ▼          ▼
-    OpenAI     Gemini     Ollama
-    (Cloud)    (Cloud)    (Local)
+  OpenAI format ──►  /v1/chat/completions     (auto-detect)
+  Anthropic     ──►  /anthropic/v1/messages
+  Gemini        ──►  /gemini/v1/generateContent
+  Ollama        ──►  /api/chat  or  /api/generate
+                         │
+                         ▼
+         ┌──────────────────────────────────┐
+         │     Qutato Universal Gateway     │
+         │                                  │
+         │  ┌────────────────────────────┐  │
+         │  │   Format Translator        │  │
+         │  │  (normalize ↔ denormalize) │  │
+         │  └────────────┬───────────────┘  │
+         │               ▼                  │
+         │  ┌─────────┐ ┌──────────────┐   │
+         │  │ Input    │ │ Abstention   │   │
+         │  │ Guards   │ │ Engine       │   │
+         │  └─────────┘ └──────────────┘   │
+         │  ┌─────────┐ ┌──────────────┐   │
+         │  │ Memory   │ │ Budget       │   │
+         │  │ Brain    │ │ Manager      │   │
+         │  └─────────┘ └──────────────┘   │
+         └──────────────┬───────────────────┘
+                        │
+             ┌──────────┼──────────┐
+             ▼          ▼          ▼
+         OpenAI     Gemini     Ollama
+         (Cloud)    (Cloud)    (Local)
+```
+
+---
+
+## Universal Gateway
+
+Qutato accepts requests in **any major AI API format** and translates them internally. Your trust engines fire regardless of format.
+
+| Format | Endpoint | Auth Header |
+|:---|:---|:---|
+| OpenAI | `/v1/chat/completions` | `X-LLM-API-KEY` |
+| Anthropic | `/anthropic/v1/messages` | `x-api-key` |
+| Gemini | `/gemini/v1/generateContent` | `x-goog-api-key` |
+| Ollama Chat | `/api/chat` | `X-LLM-API-KEY` |
+| Ollama Generate | `/api/generate` | `X-LLM-API-KEY` |
+
+All endpoints also require `X-API-KEY: qutato_admin_secret_key` for Qutato auth.
+
+### Examples
+
+**OpenAI format:**
+```bash
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "X-API-KEY: qutato_admin_secret_key" \
+  -H "X-LLM-API-KEY: sk-your-key" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gpt-4o", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+**Anthropic format:**
+```bash
+curl -X POST http://localhost:8000/anthropic/v1/messages \
+  -H "X-API-KEY: qutato_admin_secret_key" \
+  -H "x-api-key: sk-ant-your-key" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-3-opus-20240229", "max_tokens": 1024, "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+**Gemini format:**
+```bash
+curl -X POST http://localhost:8000/gemini/v1/generateContent \
+  -H "X-API-KEY: qutato_admin_secret_key" \
+  -H "x-goog-api-key: your-gemini-key" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "gemini-pro", "contents": [{"role": "user", "parts": [{"text": "Hello"}]}]}'
+```
+
+**Ollama format:**
+```bash
+curl -X POST http://localhost:8000/api/chat \
+  -H "X-API-KEY: qutato_admin_secret_key" \
+  -H "X-LLM-API-KEY: ollama" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "llama3", "messages": [{"role": "user", "content": "Hello"}]}'
+```
+
+**Format Discovery:**
+```bash
+curl http://localhost:8000/v1/formats
 ```
 
 ---
@@ -322,6 +389,7 @@ $env:PYTHONPATH = "." ; python qutato_enterprise/gateway/main.py
 - [x] Quota Savings Tracker
 - [x] Sidecar SDK for Agent Integration
 - [x] OpenClaw Compatibility
+- [x] Universal Gateway (OpenAI + Anthropic + Gemini + Ollama)
 - [ ] Qutato Cloud (Hosted SaaS)
 - [ ] Web Dashboard (Savings Analytics)
 - [ ] Adversarial Probing (OBLITERATUS-Defense)
