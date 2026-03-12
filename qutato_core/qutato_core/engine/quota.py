@@ -9,7 +9,7 @@ class QuotaManager:
             stats_path = core_config.get_stats_path()
             
         self.stats_path = stats_path
-        self._stats = {"saved_calls": 0, "saved_tokens": 0}
+        self._stats = {}
         self._load_local_stats()
         
         try:
@@ -28,7 +28,18 @@ class QuotaManager:
         if os.path.exists(self.stats_path):
             try:
                 with open(self.stats_path, "r") as f:
-                    self._stats = json.load(f)
+                    data = json.load(f)
+                # Migrate old flat format → per-user format
+                if "saved_calls" in data and not any(isinstance(v, dict) for v in data.values()):
+                    self._stats = {
+                        "default_user": {
+                            "saved_calls": data.get("saved_calls", 0),
+                            "saved_tokens": data.get("saved_tokens", 0),
+                        }
+                    }
+                    self._save_local_stats()
+                else:
+                    self._stats = data
             except:
                 pass
 
@@ -58,8 +69,10 @@ class QuotaManager:
             self.r.incr(f"quota:saved_calls:{user_id}")
             self.r.incrby(f"quota:saved_tokens:{user_id}", estimated_tokens)
         else:
-            self._stats["saved_calls"] += 1
-            self._stats["saved_tokens"] += estimated_tokens
+            if user_id not in self._stats:
+                self._stats[user_id] = {"saved_calls": 0, "saved_tokens": 0}
+            self._stats[user_id]["saved_calls"] += 1
+            self._stats[user_id]["saved_tokens"] += estimated_tokens
             self._save_local_stats()
 
     def get_savings(self, user_id: str):
@@ -70,6 +83,17 @@ class QuotaManager:
         
         # Ensure we have the latest from disk in case another process updated it
         self._load_local_stats()
-        return self._stats.get("saved_calls", 0), self._stats.get("saved_tokens", 0)
+        user_data = self._stats.get(user_id, {})
+        return user_data.get("saved_calls", 0), user_data.get("saved_tokens", 0)
+
+    def get_total_savings(self):
+        """Get combined savings across all users (local mode only)."""
+        if self.use_redis:
+            # Not implemented for Redis — would need key scanning
+            return 0, 0
+        self._load_local_stats()
+        total_calls = sum(u.get("saved_calls", 0) for u in self._stats.values() if isinstance(u, dict))
+        total_tokens = sum(u.get("saved_tokens", 0) for u in self._stats.values() if isinstance(u, dict))
+        return total_calls, total_tokens
 
 quota_manager = QuotaManager()

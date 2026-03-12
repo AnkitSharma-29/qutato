@@ -90,17 +90,17 @@ class QutaoSidecar:
 
     def status(self) -> dict:
         """Get Qutato's full status as a dictionary."""
-        saved_calls, saved_tokens = quota_manager.get_savings("antigravity_agent")
-        total_calls, total_tokens = quota_manager.get_savings("default_user")
+        agent_calls, agent_tokens = quota_manager.get_savings("antigravity_agent")
+        total_calls, total_tokens = quota_manager.get_total_savings()
         budget = budget_manager.get_status()
         loops = loop_detector.get_stats()
         return {
             "memory_health": "Optimized",
             "known_facts": len(memory_engine.memories),
-            "agent_saved_calls": saved_calls,
-            "agent_saved_tokens": saved_tokens,
-            "total_saved_calls": total_calls + saved_calls,
-            "total_saved_tokens": total_tokens + saved_tokens,
+            "agent_saved_calls": agent_calls,
+            "agent_saved_tokens": agent_tokens,
+            "total_saved_calls": total_calls,
+            "total_saved_tokens": total_tokens,
             "budget": budget,
             "loops_killed": loops["total_loops_killed"],
             "db_path": memory_engine.db_path

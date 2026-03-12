@@ -40,14 +40,14 @@ def main():
 
     if args.command == "status":
         count = len(memory_engine.memories)
-        saved_calls, saved_tokens = quota_manager.get_savings("default_user")
+        total_calls, total_tokens = quota_manager.get_total_savings()
         budget = budget_manager.get_status()
         loops = loop_detector.get_stats()
 
         print(f"--- Qutato Smart Core Status (v{__version__}) ---")
         print(f"Memory Health: Optimized")
         print(f"Known Facts:   {count}")
-        print(f"Quota Saved:   {saved_calls} requests (~{saved_tokens} tokens)")
+        print(f"Quota Saved:   {total_calls} requests (~{total_tokens} tokens)")
         print(f"Daily Budget:  {budget['tokens_today']:,} / {budget['daily_token_limit']:,} tokens ({budget['remaining_tokens']:,} left)")
         print(f"Requests Today:{budget['requests_today']}")
         print(f"Loops Killed:  {loops['total_loops_killed']}")
