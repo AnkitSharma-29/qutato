@@ -344,20 +344,7 @@ docker-compose up -d
 - **💰 Budget & Quota Management**: Daily token limits and usage tracking.
 - **🔄 Universal Gateway**: OpenAI-compatible API translating into Anthropic, Gemini, and Ollama formats.
 
-## 🛠️ Roadmap & Progress
 
-- [x] Core Abstention Engine
-- [x] Input Guardrails (Junk + Sensitive)
-- [x] Persistent Memory Brain
-- [x] Global CLI (`qutato` command)
-- [x] Quota Savings Tracker
-- [x] Sidecar SDK for Agent Integration
-- [x] OpenClaw Compatibility
-- [ ] Qutato Cloud (Hosted SaaS)
-- [ ] Web Dashboard (Savings Analytics)
-- [ ] VS Code Extension (Native Plugin)
-
----
 
 ## Contributing
 We welcome contributions! Please see our [Issues](https://github.com/AnkitSharma-29/qutato/issues) for roadmaps and tasks.
