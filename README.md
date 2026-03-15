@@ -47,20 +47,19 @@ Runtime: Python ≥ 3.9.
 git clone https://github.com/AnkitSharma-29/qutato.git
 cd qutato
 pip install -e qutato_core
-pip install -r qutato_enterprise/requirements.txt
 ```
 
 ## Quick start (TL;DR)
 
 ```bash
-# Start the Gateway (control plane)
-$env:PYTHONPATH = "." ; python qutato_enterprise/gateway/main.py
-
 # Use the global CLI from anywhere
 qutato status
 qutato learn "The project deadline is next Friday."
 qutato recall "deadline"
 ```
+
+> [!NOTE]
+> To run the full Qutato Gateway with multi-provider support and enterprise guardrails, check out the [Qutato Enterprise](https://github.com/AnkitSharma-29/qutato-enterprise) repository.
 
 Upgrading? Just `git pull` and `pip install -e qutato_core`.
 
@@ -275,13 +274,10 @@ Qutato adds less than **0.1 ms** of overhead. It is effectively invisible.
 
 ## Configuration
 
-All configuration is in `qutato_enterprise/gateway/config.py` or via a `.env` file:
+Qutato Core settings can be found in `qutato_core/config.py` or managed via the CLI.
 
 | Key | Default | Description |
 |:---|:---|:---|
-| `ADMIN_API_KEY` | `qutato_admin_secret_key` | Gateway access key |
-| `REDIS_HOST` | `localhost` | Redis host (optional) |
-| `REDIS_PORT` | `6379` | Redis port (optional) |
 | `DEFAULT_THRESHOLD` | `0.85` | Abstention sensitivity |
 | `DEBUG` | `true` | Verbose logging |
 
@@ -305,35 +301,18 @@ Qutato is designed for **local-first, privacy-first** operation.
 git clone https://github.com/AnkitSharma-29/qutato.git
 cd qutato
 pip install -e qutato_core
-pip install -r qutato_enterprise/requirements.txt
 
-# Dev loop
-$env:PYTHONPATH = "." ; python qutato_enterprise/gateway/main.py
+# Run tests
+pytest
 ```
 
 ---
 
 ### Deployment & Production
 
-Qutato is built for production-grade reliability. You can deploy it as a standalone container with horizontal scaling.
+The Qutato Smart Core is designed to be embedded in your own applications using the [Sidecar SDK](#sidecar-agent-sdk).
 
-#### 🐳 Docker Deployment (Recommended)
-The gateway is optimized for containerization with built-in multi-worker support.
-
-```bash
-# Build the production image
-docker build -t qutato-gateway -f qutato_enterprise/Dockerfile .
-
-# Run with Docker Compose (includes Redis for persistent stats)
-cd qutato_enterprise
-docker-compose up -d
-```
-
-#### 🛡️ Production Hardening
-1. **Environment Variables**: Use `.env` to override `ADMIN_API_KEY` and `REDIS_HOST`.
-2. **Horizontal Scaling**: The `Dockerfile` uses 4 uvicorn workers by default. Adjust based on your CPU cores.
-3. **Redis Backend**: For production, always use the Redis dependency to ensure token counters are accurate across multiple gateway instances.
-4. **SSL/TLS**: Deploy behind a reverse proxy (Nginx/Traefik) for HTTPS termination.
+For production-grade **Gateway** deployment (Docker, multi-worker support, and Redis caching), please see the [Qutato Enterprise](https://github.com/AnkitSharma-29/qutato-enterprise) repository.
 
 ---
 
