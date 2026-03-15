@@ -30,8 +30,10 @@ def main():
     budget_parser.add_argument("--set-tokens", type=int, help="Set daily limit in tokens (e.g. --set-tokens 500000)")
     budget_parser.add_argument("--reset", action="store_true", help="Reset today's token count")
 
-    # Command: update
-    subparsers.add_parser("update", help="Update Qutato to the latest version")
+    # Command: gstack
+    gstack_parser = subparsers.add_parser("gstack", help="gstack compatibility bridge")
+    gstack_parser.add_argument("--role", help="Engineering role (CEO, Architect, Security, QA)")
+    gstack_parser.add_argument("--prompt", required=True, help="Prompt to vet")
 
     # Command: commands
     subparsers.add_parser("commands", help="List all available Qutato commands")
@@ -118,6 +120,14 @@ def main():
         except Exception as e:
             print(f"❌ Error during update: {e}")
 
+    elif args.command == "gstack":
+        from qutato_core.gstack_bridge import GStackBridge
+        bridge = GStackBridge()
+        report = bridge.vet_prompt(args.prompt, role=args.role)
+        
+        import json
+        print(json.dumps(report, indent=2))
+
     elif args.command == "commands":
         from qutato_core.engine.logo import print_logo
         print_logo()
@@ -133,6 +143,8 @@ def main():
         print("  recall    Search the Brain for context")
         print("            - qutato recall \"deadline\"")
         print("  forget    Wipe the entire memory brain")
+        print("  gstack    Analyze a prompt through an engineering role lens")
+        print("            - qutato gstack --role Architect --prompt \"use global vars\"")
         print("  update    Pull the latest Qutato updates from GitHub")
         print("  commands  Show this custom help menu\n")
 

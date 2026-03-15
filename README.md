@@ -340,6 +340,9 @@ docker-compose up -d
 ### ✨ Core Features
 - **🛡️ Formal Trust (Abstention Engine)**: Adaptive thresholding for sensitive requests.
 - **🕵️‍♂️ Adversarial Probing (OBLITERATUS)**: Detects prompt injections, jailbreaks, and malicious framing.
+- **🏗️ Role-Aware Vetting (gstack Integration)**: Specialized safety patterns for engineering roles (CEO, Architect, Security, QA).
+- **🌉 gstack Bridge**: Seamless integration with `Bun`-based `gstack` skills and Claude Code.
+- **🌐 Browser Vulture**: Browser-driven visual and functional safety verification.
 - **🧠 Persistent Memory (Shared Brain)**: Local-first fact storage with Multi-Agent synchronization support.
 - **💰 Budget & Quota Management**: Daily token limits and usage tracking.
 - **🔄 Universal Gateway**: OpenAI-compatible API translating into Anthropic, Gemini, and Ollama formats.

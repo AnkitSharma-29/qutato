@@ -230,9 +230,13 @@ async def _process_request(
 
         # --- 1.2 Adversarial Probing ---
         from qutato_core.engine.adversarial_prober import adversarial_prober
-        adv_report = adversarial_prober.probe(last_prompt)
+        
+        # Extract role for specialized vetting (gstack integration)
+        role = request.headers.get("X-QUTATO-ROLE") or data.get("role")
+        
+        adv_report = adversarial_prober.probe(last_prompt, role=role)
         if adv_report["is_adversarial"]:
-            print(f"🛑 [Qutato] [{source_format.upper()}] Blocked ADVERSARIAL: {adv_report['matched_patterns']}")
+            print(f"🛑 [Qutato] [{source_format.upper()}] Blocked ADVERSARIAL ({role or 'Generic'}): {adv_report['matched_patterns']}")
             from qutato_core.engine.quota import quota_manager
             quota_manager.log_savings(user_id, estimated_tokens=100)
             raise HTTPException(
