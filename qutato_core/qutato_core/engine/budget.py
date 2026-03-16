@@ -14,6 +14,7 @@ import json
 import os
 import time
 from datetime import datetime
+import importlib.util
 
 
 from typing import Dict, Any, Optional
@@ -37,6 +38,7 @@ class BudgetManager:
             "requests_today": 0,
             "blocked_today": 0,
         }
+        self.audit_plugin = self._load_audit_plugin()
         self._load()
 
     def _load(self):
@@ -87,6 +89,21 @@ class BudgetManager:
                 except:
                     pass
 
+    def _load_audit_plugin(self):
+        """Dynamically loads the audit plugin if QUTATO_AUDIT_PLUGIN is set."""
+        plugin_path = os.getenv("QUTATO_AUDIT_PLUGIN")
+        if plugin_path and os.path.exists(plugin_path):
+            try:
+                spec = importlib.util.spec_from_file_location("audit_plugin", plugin_path)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    # Expecting MetaxyAuditPlugin class in the plugin
+                    return getattr(module, "MetaxyAuditPlugin")()
+            except Exception as e:
+                print(f"⚠️ [Qutato Budget] Failed to load audit plugin: {e}.")
+        return None
+
     def set_token_limit(self, limit: int):
         """Set the daily token cap."""
         self._data["daily_token_limit"] = int(limit)
@@ -113,6 +130,17 @@ class BudgetManager:
         self._data["blocked_today"] = int(self._data.get("blocked_today", 0)) + 1
         self._save()
         print(f"🛑 [Qutato Budget] Blocked by: {reason}")
+        
+        # Forward to Metaxy Audit Plugin if active
+        if self.audit_plugin:
+            try:
+                self.audit_plugin.log_event(
+                    event_type="safety_block",
+                    reason=reason,
+                    timestamp=datetime.now().isoformat()
+                )
+            except Exception as e:
+                print(f"⚠️ [Qutato Budget] Audit Plugin failed: {e}")
 
     def log_spend(self, tokens_used: int):
         """Record a completed request's token usage."""
