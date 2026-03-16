@@ -5,15 +5,15 @@ This project uses Qutato Smart Core integrated with `gstack` workflow skills.
 ## Role-Based Vetting
 When prompting the agent, you can specify your current role to enable specialized safety patterns:
 - **CEO Mode**: Challenges product assumptions and prevents reckless shipping.
-- **Architect Mode**: Enforces decoupling and system integrity.
-- **Security Mode**: Prevents hardcoded secrets and insecure configurations.
-- **QA Mode**: Ensures tests are never skipped.
+- **Architect Pro**: Enforces decoupling and system integrity with context window optimization.
+- **Security Pro**: Active write-time checking for secrets and PII redacting.
+- **QA Pro**: Automated "minimal-delta" test verification and coverage monitoring.
 
 ## gstack Skills
 The following skills are available as `gstack` slash commands:
 
-### `/plan-review` (Architect Mode)
-Vets the current design proposal for architectural soundness.
+### `/plan-review` (Architect Pro)
+Vets the current design proposal using [PULSE.md](file:///C:/Users/ankit/.gemini/antigravity/scratch/qutato-enterprise/PULSE.md) standards.
 ```bash
 qutato gstack --role Architect --prompt "Review current design"
 ```

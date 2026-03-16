@@ -82,6 +82,7 @@ qutato status
 - **[Quota Optimization](#quota-savings)** — Tracks every token you save. Shows your ROI in real-time.
 - **[Sidecar SDK](#sidecar-agent-sdk)** — Direct Python integration for any AI agent (no HTTP needed).
 - **[Universal Compatibility](#integrations)** — Works with OpenClaw, Roo Code, Continue, Ollama, LM Studio, and any OpenAI-compatible tool.
+- **[Qutato Turbo](#qutato-turbo)** — Sub-millisecond adaptive optimization. Includes Concise Mode and Context Pruning to save up to 40% on token costs.
 - **[Global CLI](#cli-commands)** — `qutato` command available from any terminal, any directory.
 - **[Sub-Millisecond Speed](#performance)** — Verified overhead of **0.022 ms**. Invisible to the user.
 
@@ -311,11 +312,10 @@ The Qutato Smart Core is designed to be embedded in your own applications using 
 ---
 
 ### ✨ Core Features
+- **⚡ Qutato Turbo**: Adaptive brevity and context pruning for high-speed local development.
 - **🛡️ Formal Trust (Abstention Engine)**: Adaptive thresholding for sensitive requests.
 - **🕵️‍♂️ Adversarial Probing (OBLITERATUS)**: Detects prompt injections, jailbreaks, and malicious framing.
-- **🏗️ Role-Aware Vetting (gstack Integration)**: Specialized safety patterns for engineering roles (CEO, Architect, Security, QA).
-- **🌉 gstack Bridge**: Seamless integration with `Bun`-based `gstack` skills and Claude Code.
-- **🌐 Browser Vulture**: Browser-driven visual and functional safety verification.
+- **🏗️ Role-Aware Vetting (gstack Integration)**: Pro-level safety patterns for Architect, Security, and QA roles.
 - **🧠 Persistent Memory (Shared Brain)**: Local-first fact storage with Multi-Agent synchronization support.
 - **💰 Budget & Quota Management**: Daily token limits and usage tracking.
 - **🔄 Universal Gateway**: OpenAI-compatible API translating into Anthropic, Gemini, and Ollama formats.
