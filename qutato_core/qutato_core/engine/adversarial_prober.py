@@ -1,5 +1,8 @@
 import re
 from typing import Dict, List
+import os
+import importlib.util
+import hashlib
 
 class AdversarialProber:
     """
@@ -7,6 +10,7 @@ class AdversarialProber:
     and context hijacking.
     """
     def __init__(self):
+        self.safety_cache_plugin = self._load_safety_cache_plugin()
         # Known jailbreak and injection patterns (Generic)
         self.adversarial_patterns = [
             # Prompt Injection
@@ -56,6 +60,17 @@ class AdversarialProber:
         Scan a prompt for adversarial intent.
         Optionally takes a 'role' to apply specialized role-based vetting.
         """
+        # 0. Check Safety Cache
+        prompt_hash = hashlib.sha256(f"{role or 'generic'}:{prompt}".encode()).hexdigest()
+        if self.safety_cache_plugin:
+            try:
+                cached = self.safety_cache_plugin.check_cache(prompt_hash)
+                if cached is not None:
+                    print(f"⚡ [Qutato Safety] Cache hit for prompt ({prompt_hash[:8]}).")
+                    return cached
+            except Exception as e:
+                print(f"⚠️ [Qutato Safety] Cache check failed: {e}")
+
         matched = []
         
         # 1. Generic Checks
@@ -70,12 +85,35 @@ class AdversarialProber:
                     matched.append(f"[{role}] {pattern}")
 
         is_adversarial = len(matched) > 0
-        
-        return {
+        result = {
             "is_adversarial": is_adversarial,
             "matched_patterns": matched,
             "risk_level": "high" if is_adversarial else "low"
         }
+        
+        # 3. Update Safety Cache
+        if self.safety_cache_plugin:
+            try:
+                self.safety_cache_plugin.update_cache(prompt_hash, result)
+            except Exception as e:
+                print(f"⚠️ [Qutato Safety] Cache update failed: {e}")
+
+        return result
+
+    def _load_safety_cache_plugin(self):
+        """Dynamically loads the safety cache plugin if QUTATO_SAFETY_CACHE_PLUGIN is set."""
+        plugin_path = os.getenv("QUTATO_SAFETY_CACHE_PLUGIN")
+        if plugin_path and os.path.exists(plugin_path):
+            try:
+                spec = importlib.util.spec_from_file_location("safety_cache_plugin", plugin_path)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    # Expecting MetaxySafetyCachePlugin class
+                    return getattr(module, "MetaxySafetyCachePlugin")()
+            except Exception as e:
+                print(f"⚠️ [Qutato Safety] Failed to load safety cache plugin: {e}.")
+        return None
 
 # Global singleton
 adversarial_prober = AdversarialProber()

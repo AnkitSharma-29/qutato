@@ -2,6 +2,7 @@ import json
 import os
 import time
 from typing import List, Dict, Optional, Any
+import importlib.util
 
 class Fact:
     def __init__(self, text: str, metadata: Optional[Dict[str, Any]] = None, timestamp: Optional[float] = None):
@@ -34,6 +35,7 @@ class QutatoMemory:
         self.db_path: str = str(db_path)
         self.remote_url: Optional[str] = remote_url
         self.memories: List[Fact] = []
+        self.memory_plugin = self._load_memory_plugin()
         self._load()
 
     def sync(self) -> dict:
@@ -82,16 +84,43 @@ class QutatoMemory:
                 try: os.remove(temp_path)
                 except: pass
 
+    def _load_memory_plugin(self):
+        """Dynamically loads the memory plugin if QUTATO_MEMORY_PLUGIN is set."""
+        plugin_path = os.getenv("QUTATO_MEMORY_PLUGIN")
+        if plugin_path and os.path.exists(plugin_path):
+            try:
+                spec = importlib.util.spec_from_file_location("memory_plugin", plugin_path)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    # Expecting MetaxyMemoryPlugin class in the plugin
+                    return getattr(module, "MetaxyMemoryPlugin")()
+            except Exception as e:
+                print(f"⚠️ [Qutato Memory] Failed to load memory plugin: {e}.")
+        return None
+
     def store(self, text: str, metadata: Optional[Dict[str, Any]] = None):
         """Add a new fact and persist to disk atomically."""
         clean_text = str(text).strip()
         if not clean_text:
             return
         fact = Fact(clean_text, metadata)
-        self.memories.append(fact)
-        self._save()
+        
+        # In Pro mode, we prioritize the Metaxy Plugin for absolute truth
+        if self.memory_plugin:
+            try:
+                self.memory_plugin.store_fact(text=fact.text, metadata=fact.metadata, timestamp=fact.timestamp)
+                print(f"🧠 [Memory] Persisted to Metaxy Pro Store.")
+            except Exception as e:
+                print(f"⚠️ [Qutato Memory] Memory Plugin failed: {e}. Falling back to local.")
+                self.memories.append(fact)
+                self._save()
+        else:
+            self.memories.append(fact)
+            self._save()
+            
         preview = clean_text[:50]
-        print(f"🧠 [Memory] Persisted fact: '{preview}...'")
+        print(f"🧠 [Memory] Fact processed: '{preview}...'")
 
     def retrieve(self, query: str, limit: int = 3) -> List[str]:
         """Keyword-based retrieval using relevance scoring."""
@@ -111,6 +140,18 @@ class QutatoMemory:
         scored_memories.sort(key=lambda x: x[0], reverse=True)
         # Extract matches
         matches = [text for _, text in scored_memories]
+        
+        # Merge with matches from Metaxy Memory Plugin if active
+        if self.memory_plugin:
+            try:
+                pro_matches = self.memory_plugin.retrieve_facts(query=clean_query, limit=limit)
+                # Combine and remove duplicates while preserving order
+                for match in pro_matches:
+                    if match not in matches:
+                        matches.append(match)
+            except Exception as e:
+                print(f"⚠️ [Qutato Memory] Memory Plugin failed to retrieve: {e}")
+                
         return matches[:limit]
 
     def clear(self):
