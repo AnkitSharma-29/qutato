@@ -1,40 +1,43 @@
-import numpy as np
+import os
+import importlib.util
 
-class AbstentionEngine:
+class BasicAbstentionEngine:
+    """Standard, reliable threshold logic for open-source users."""
     def __init__(self, base_threshold=0.85):
         self.base_threshold = base_threshold
 
-    def calculate_adaptive_threshold(self, confidence, urgency, sensitivity=1.0, alpha=0.1, beta=0.05):
-        """
-        Implementation of the adaptive threshold equation:
-        Tdynamic(c, u) = Tbase + alpha * sensitivity(c) - beta * trust(u)
-        
-        Note: Simplified for the initial version.
-        """
-        # Tdynamic = Tbase + α * sensitivity(c) - β * urgency(u)
-        # We want to increase the threshold (be more restrictive) when sensitivity is high
-        # We want to decrease it (be more helpful) when urgency is high
-        
-        dynamic_threshold = self.base_threshold + (alpha * sensitivity) - (beta * urgency)
-        return np.clip(dynamic_threshold, 0.0, 1.0)
-
-    def should_abstain(self, 
-                       model_confidence, 
-                       task_urgency, 
-                       sensitivity_score,
-                       has_memory_match=False):
-        """
-        Calculate adaptive threshold and decide whether to abstain.
-        Enhanced with Memory Context: If memory has a match, we can trust the model more.
-        """
-        threshold = self.calculate_adaptive_threshold(model_confidence, task_urgency, sensitivity_score)
-        
-        # Memory Offset: If we have context, lower the threshold (make it easier to say yes)
-        if has_memory_match:
-            threshold -= 0.15 # 15% boost to trust
-            threshold = max(0.1, threshold) # Cap at 0.1
-            
+    def should_abstain(self, model_confidence, task_urgency, sensitivity_score, **kwargs):
+        # Reliable threshold: increases with sensitivity, decreases with urgency
+        threshold = self.base_threshold + (0.1 * sensitivity_score) - (0.05 * task_urgency)
         return model_confidence < threshold, threshold
+
+class AbstentionEngine:
+    """
+    The Trust Proxy. Dynamically loads advanced research logic if available,
+    otherwise falls back to the Basic Engine.
+    """
+    def __init__(self):
+        self.plugin_path = os.getenv("QUTATO_ABSTENTION_PLUGIN")
+        self.engine = self._load_engine()
+
+    def _load_engine(self):
+        plugin_path = self.plugin_path
+        if plugin_path and os.path.exists(plugin_path):
+            try:
+                spec = importlib.util.spec_from_file_location("advanced_engine", plugin_path)
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    # Expecting AdvancedAbstentionEngine class in the plugin
+                    return getattr(module, "AdvancedAbstentionEngine")()
+            except Exception as e:
+                print(f"⚠️ [Qutato] Failed to load abstention plugin: {e}. Falling back to Basic Engine.")
+        
+        return BasicAbstentionEngine()
+
+    def should_abstain(self, *args, **kwargs):
+        """Passes all data directly to the active engine (Basic or Advanced)."""
+        return self.engine.should_abstain(*args, **kwargs)
 
 # Singleton for the engine
 abstention_engine = AbstentionEngine()

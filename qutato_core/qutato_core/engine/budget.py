@@ -107,6 +107,13 @@ class BudgetManager:
             return False
         return True
 
+    def log_block(self, reason: str = "safety_block"):
+        """Record a safety block (junk, adversarial, loop, etc.)"""
+        self._load()
+        self._data["blocked_today"] = int(self._data.get("blocked_today", 0)) + 1
+        self._save()
+        print(f"🛑 [Qutato Budget] Blocked by: {reason}")
+
     def log_spend(self, tokens_used: int):
         """Record a completed request's token usage."""
         self._data["tokens_today"] = int(self._data.get("tokens_today", 0)) + int(tokens_used)

@@ -38,26 +38,29 @@ import json
 class QutaoSidecar:
     """Direct Python integration for AI agents — no HTTP needed."""
 
-    def is_safe(self, prompt: str) -> bool:
+    def is_safe(self, prompt: str, role: str = None) -> bool:
         """Full safety check: junk + adversarial + loop + budget. Returns True if safe."""
         # 1. Check for junk
         report = prompt_detector.analyze_prompt(prompt)
         if report["is_junk"]:
             print(f"🚫 [Qutato Sidecar] Blocked JUNK: '{prompt[:40]}...'")
             quota_manager.log_savings("sidecar_agent", estimated_tokens=10)
+            budget_manager.log_block(reason="junk_input")
             return False
 
         # 2. Check for adversarial probes (Injections/Jailbreaks)
-        adv_report = adversarial_prober.probe(prompt)
+        adv_report = adversarial_prober.probe(prompt, role=role)
         if adv_report["is_adversarial"]:
             print(f"🛑 [Qutato Sidecar] Blocked ADVERSARIAL: '{prompt[:40]}...'")
             print(f"   Reason: Matched patterns {adv_report['matched_patterns']}")
             quota_manager.log_savings("sidecar_agent", estimated_tokens=100)
+            budget_manager.log_block(reason=f"adversarial_probe ({role or 'Generic'})")
             return False
 
         # 3. Check for loops
         if loop_detector.is_loop(prompt):
             quota_manager.log_savings("sidecar_agent", estimated_tokens=250)
+            budget_manager.log_block(reason="loop_detected")
             return False
 
         # 4. Check budget
