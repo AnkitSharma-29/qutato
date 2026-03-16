@@ -17,7 +17,7 @@
 [![Active Development](https://img.shields.io/badge/Status-Active%20Development-blue.svg)](#quick-start)
 [![Open Source](https://img.shields.io/badge/Open-Source-brightgreen.svg)](https://github.com/AnkitSharma-29/qutato)
 
-Qutato is a local-first AI trust layer you run on your own machine. It sits between your applications and your LLM providers, vetting every request and response with mathematical precision. The Gateway is the control plane the product is **trust**.
+Qutato is a local-first AI trust layer. It sits between your applications and your LLM providers, vetting every request and response with mathematical precision. The Gateway is the control plane — the product is **trust**.
 
 If you want an AI safety layer that is fast, private, and always-on, this is it.
 
@@ -65,13 +65,8 @@ Upgrading? Just `git pull` and `pip install -e qutato_core`.
 
 ---
 
-## Security defaults (API access)
-
-Qutato runs on `localhost`. Treat all external access as untrusted input.
-
-- **API Key gating** (`ADMIN_API_KEY`): All requests require a valid Qutato key. Unknown clients are rejected.
-- **Customize with:** Set `ADMIN_API_KEY=your_key` in a `.env` file or edit `config.py`.
-- **Local-only by default:** The Gateway binds to `0.0.0.0:8000` but all data stays in `~/.qutato/`.
+- **Secure by default:** Treat all external access as untrusted input.
+- **Local-only by default:** All data stays in `~/.qutato/` — portable, global, and private.
 
 Run `qutato status` to surface health and configuration.
 
@@ -98,7 +93,7 @@ qutato status
 ## Everything we built so far
 
 ### Core platform
-- **Gateway API** (`localhost:8000`) — OpenAI-compatible control plane for all LLM traffic. Handles auth, routing, vetting, and quota tracking.
+- **Gateway API** — Control plane for all LLM traffic. Handles routing, vetting, and quota tracking.
 - **CLI surface:** `qutato status`, `qutato learn`, `qutato recall`, `qutato forget`.
 - **Persistent storage:** All data lives in `~/.qutato/` — portable, global, and private.
 
@@ -175,7 +170,6 @@ Your App / IDE Extension / AI Agent / OpenClaw / CLI
     ┌───────────────────────────────┐
     │       Qutato Gateway          │
     │      (control plane)          │
-    │   http://localhost:8000/v1    │
     │                               │
     │  ┌─────────┐ ┌────────────┐  │
     │  │ Input    │ │ Abstention │  │
@@ -211,8 +205,8 @@ Qutato is fully compatible with OpenClaw. Add Qutato as a custom provider in `~/
   "models": {
     "providers": {
       "qutato": {
-        "baseUrl": "http://localhost:8000/v1",
-        "apiKey": "qutato_admin_secret_key"
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "apiKey": "your_qutato_key"
       }
     }
   }
@@ -233,8 +227,8 @@ from langchain_openai import ChatOpenAI
 
 # Point your CrewAI agents to the Qutato Gateway
 qutato_llm = ChatOpenAI(
-    base_url="http://localhost:8000/v1",
-    api_key="qutato_admin_secret_key",
+    base_url="http://127.0.0.1:8000/v1",
+    api_key="your_qutato_key",
     model="gpt-4o"
 )
 
