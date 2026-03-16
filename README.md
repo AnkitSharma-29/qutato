@@ -14,7 +14,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Production Ready](https://img.shields.io/badge/Production-Ready-green.svg)](#quick-start)
+[![Active Development](https://img.shields.io/badge/Status-Active%20Development-blue.svg)](#quick-start)
 [![Open Source](https://img.shields.io/badge/Open-Source-brightgreen.svg)](https://github.com/AnkitSharma-29/qutato)
 
 Qutato is a local-first AI trust layer you run on your own machine. It sits between your applications and your LLM providers, vetting every request and response with mathematical precision. The Gateway is the control plane — the product is **trust**.
