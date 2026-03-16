@@ -116,7 +116,7 @@ qutato status
 - **Short Prompt Filter:** Prevents wasteful single-character or empty requests.
 
 #### Abstention Engine
-- **Adaptive Thresholding:** `T(c,u) = T_base + α·sensitivity(c) − β·trust(u)` — mathematically derived from risk minimization.
+- **Adaptive Thresholding:** mathematically derived from risk minimization.
 - **Confidence Gating:** If the AI's internal confidence is below the threshold, Qutato suppresses the response.
 - **Lagrangian Derivation:** The threshold is derived from a formal trade-off between false positives and false negatives.
 
