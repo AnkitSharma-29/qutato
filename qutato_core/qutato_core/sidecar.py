@@ -32,6 +32,7 @@ from qutato_core.engine.adversarial_prober import adversarial_prober
 from qutato_core.engine.quota import quota_manager
 from qutato_core.engine.budget import budget_manager
 from qutato_core.engine.loop_detector import loop_detector
+from qutato_core.engine.pii_redactor import pii_redactor
 import json
 
 
@@ -71,6 +72,10 @@ class QutaoSidecar:
             print(f"⚠️  [Qutato Sidecar] Sensitive content detected in: '{prompt[:40]}...'")
         print(f"✅ [Qutato Sidecar] Safe: '{prompt[:40]}...'")
         return True
+
+    def redact(self, text: str, bypass: bool = False) -> str:
+        """Redact PII from text using Qutato's privacy engine."""
+        return pii_redactor.redact(text, bypass=bypass)
 
     def learn(self, fact: str) -> None:
         """Store a fact in Qutato's persistent memory."""
