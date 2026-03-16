@@ -136,6 +136,11 @@ qutato status
 - **Real-Time Counter:** `qutato status` shows your cumulative savings.
 - **Persistent Tracking:** Saved in `~/.qutato/qutato_stats.json`.
 
+### Plug-and-Play Architecture (Zero Config)
+- **Out-of-the-box**: Qutato works immediately without any special configuration. It defaults to a high-performance **Basic Abstention Engine** that uses reliable adaptive thresholding.
+- **Advanced Extensions**: Power users and researchers can plug in their own custom engines by setting the `QUTATO_ABSTENTION_PLUGIN` environment variable.
+- **Community Safe**: No proprietary code or secret logic is required for the platform to provide full value.
+
 ### Sidecar (Agent SDK)
 - **Direct Python API** — No HTTP gateway needed. Agents import `qutato` and call it directly.
 - **Functions:** `qutato.is_safe()`, `qutato.learn()`, `qutato.recall()`, `qutato.log_saving()`, `qutato.status()`.
