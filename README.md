@@ -58,10 +58,7 @@ qutato learn "The project deadline is next Friday."
 qutato recall "deadline"
 ```
 
-> [!NOTE]
-> To run the full Qutato Gateway with multi-provider support and enterprise guardrails, check out the [Qutato Enterprise](https://github.com/AnkitSharma-29/qutato-enterprise) repository.
 
-Upgrading? Just `git pull` and `pip install -e qutato_core`.
 
 ---
 
@@ -310,8 +307,6 @@ pytest
 ### Deployment & Production
 
 The Qutato Smart Core is designed to be embedded in your own applications using the [Sidecar SDK](#sidecar-agent-sdk).
-
-For production-grade **Gateway** deployment (Docker, multi-worker support, and Redis caching), please see the [Qutato Enterprise](https://github.com/AnkitSharma-29/qutato-enterprise) repository.
 
 ---
 
