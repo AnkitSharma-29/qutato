@@ -125,10 +125,10 @@ qutato status
 - **Confidence Gating:** If the AI's internal confidence is below the threshold, Qutato suppresses the response.
 - **Lagrangian Derivation:** The threshold is derived from a formal trade-off between false positives and false negatives.
 
-#### Memory Engine
-- **Persistent Facts:** Store project context, deadlines, and knowledge that survives across sessions.
-- **Smart Recall:** Keyword-based retrieval with relevance scoring.
-- **Global Brain:** Shared across all tools, agents, and terminals via `~/.qutato/qutato_memory.json`.
+#### PII Redactor (Privacy Shield) 🔒
+- **Automatic Masking**: Detects and masks Emails, SSNs, Credit Cards, and API Keys *locally* before they reach the LLM provider.
+- **Privacy vs. Execution Pattern**: The LLM (Mastermind) sees redacted data, but your local Python code (Executor) uses the real data from a secure vault to fulfill tasks (e.g., Amazon purchases).
+- **Transactional Bypass**: Use `--bypass-pii` (CLI) or `bypass_pii_redaction=True` (SDK) for intentional data sharing.
 
 #### Quota Savings
 - **Junk Interception:** Each blocked junk prompt saves ~10 tokens.
