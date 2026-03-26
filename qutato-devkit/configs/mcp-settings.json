@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "qutato-devkit": {
+      "command": "qutato-devkit",
+      "args": ["mcp"],
+      "env": {},
+      "description": "Qutato Trust Layer — safety, memory, budget, PII redaction for AI agents"
+    }
+  }
+}
