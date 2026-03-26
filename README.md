@@ -77,14 +77,26 @@ qutato status
 
 - **[Daily Budget Cap](#budget-manager)** — Prevent runaway local agents. Set a daily token limit (e.g., 500,000) and Qutato blocks all further LLM calls once reached.
 - **[Agent Loop Detector](#loop-detector)** — Auto-kills runaway agent loops. If an agent repeats the same action 3 times, Qutato stops it to save your budget.
+- **[Universal Agent Router](#agent-router)** — Detects and routes tasks to the best automation agent (Browser-Use, Open Interpreter, PyAutoGUI, etc.).
 - **[Input Guardrails](#input-guardrails)** — Junk detection, keyboard mashing filter, sensitive keyword flagging. Blocks bad prompts before they cost you tokens.
 - **[Persistent Memory Brain](#memory-engine)** — A "Second Brain" for agents that stores facts and recalls context across sessions.
-- **[Quota Optimization](#quota-savings)** — Tracks every token you save. Shows your ROI in real-time.
-- **[Sidecar SDK](#sidecar-agent-sdk)** — Direct Python integration for any AI agent (no HTTP needed).
+- **[MCP Server Support](#mcp)** — Connect Qutato directly to Cursor, Claude Code, or Antigravity via the Model Context Protocol.
 - **[Universal Compatibility](#integrations)** — Works with OpenClaw, Roo Code, Continue, Ollama, LM Studio, and any OpenAI-compatible tool.
 - **[Qutato Turbo](#qutato-turbo)** — Sub-millisecond adaptive optimization. Includes Concise Mode and Context Pruning to save up to 40% on token costs.
-- **[Global CLI](#cli-commands)** — `qutato` command available from any terminal, any directory.
-- **[Sub-Millisecond Speed](#performance)** — Verified overhead of **0.022 ms**. Invisible to the user.
+- **[Global CLI](#cli-commands)** — `qutato` and `qutato-devkit` commands available from any terminal.
+
+---
+
+## 🛠️ Qutato DevKit: The Automation Platform
+
+The **Qutato DevKit** is a unified toolkit for building and running autonomous AI agents safely. It bridges the gap between raw LLM power and real-world execution.
+
+| Component | Purpose |
+|:---|:---|
+| **MCP Server** | Exposes 9 trust tools (learn, recall, redact, check) to any IDE. |
+| **Agent Router** | Intelligent task dispatching to system-level automation agents. |
+| **Skills Pack** | Modular "Playbooks" that teach your AI how to use Qutato securely. |
+| **Browser Script** | Pre-configured `browser-use` execution with built-in trust checks. |
 
 ---
 
@@ -92,7 +104,8 @@ qutato status
 
 ### Core platform
 - **Gateway API** — Control plane for all LLM traffic. Handles routing, vetting, and quota tracking.
-- **CLI surface:** `qutato status`, `qutato learn`, `qutato recall`, `qutato forget`.
+- **DevKit CLI** — Setup agents, manage MCP, and verify system-wide safety.
+- **CLI surface:** `qutato status`, `qutato learn`, `qutato recall`, `qutato forget`, `qutato-devkit setup`.
 - **Persistent storage:** All data lives in `~/.qutato/` — portable, global, and private.
 
 ### Trust + safety
@@ -147,6 +160,13 @@ if qutato.is_safe(user_prompt):
 else:
     print("Blocked by Qutato")
 ```
+
+### Automation & Browser Agents 🌐
+Qutato provides native integration wrappers for the industry's best automation tools:
+- **[Browser-Use](https://github.com/browser-use/browser-use)**: AI-driven Chrome automation with Qutato safety checks.
+- **[Agent-Browser](https://github.com/vercel-labs/agent-browser)**: Vercel's CLI browser automation, forced through the trust gate.
+- **[Last30Days](https://github.com/mvanhorn/last30days-skill)**: Safe multi-platform research (Reddit, X, YouTube) with budget and PII shielding.
+- **[Open Interpreter](https://github.com/OpenInterpreter/open-interpreter)**: Secure terminal and system task execution.
 
 ### CLI commands
 
