@@ -1,194 +1,89 @@
-# 🛡️ Qutato DevKit — The Universal AI Trust & Automation Platform
+# 🛡️ Qutato DevKit: The Universal AI Trust & Automation Platform
 
-> **One install. Every AI agent. Every screen. Every API. Fully local. Fully safe.**
+> **"One Command. Every Agent. Total Trust."**
 
-Qutato DevKit is the **only tool** that combines safety + budget + memory + universal compatibility in one free, local-first package.
+Qutato DevKit is the ultimate local-first infrastructure for AI agents. It provides an enterprise-grade safety layer (PII redaction, budget control, loop detection) and persistent memory that integrates seamlessly with your existing automation tools.
+
+Whether you're using **Browser-Use**, **Open Interpreter**, **Agent-Browser**, or **PyAutoGUI**, Qutato sits in the middle to ensure every action is safe, private, and cost-effective.
 
 ---
 
-## ⚡ Quick Start (30 Seconds)
+## ✨ Core Features
 
+### 1. 🛡️ Trust Engine
+The brain of Qutato safety. It intercepts every prompt and response to enforce:
+- **PII Redaction:** Automatically detects and masks Emails, SSNs, Credit Cards, API Keys, and Phone Numbers locally.
+- **Budget Manager:** Set daily token caps to prevent runaway automation costs.
+- **Loop Detector:** Stops agents from getting stuck in infinite "Try Again" cycles.
+- **Input Guardrails:** Blocks keyboard mashing and nonsensical junk inputs.
+
+### 2. 🧠 Memory Brain
+A persistent local knowledge store. Qutato remembers project context, user preferences, and past facts so your agents can "recall" them in future sessions without re-learning.
+
+### 3. 🤖 Universal Agent Router
+Automatically detects installed agents on your system and routes tasks to the best tool:
+- Browsing tasks → `Browser-Use` or `Agent-Browser`
+- Coding/System tasks → `Open Interpreter`
+- GUI automation → `PyAutoGUI`
+
+### 4. 🔌 Protocol Support (MCP)
+Qutato is a first-class **Model Context Protocol (MCP)** server. Connect it to Cursor, Claude Code, Antigravity, or any MCP-compatible IDE to give your AI agent superpowers.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Installation
 ```bash
-pip install -e ./qutato-devkit
+# Clone the repository
+git clone https://github.com/AnkitSharma-29/qutato.git
+cd qutato/qutato-devkit
+
+# Install as editable package
+pip install -e .
+```
+
+### 2. Setup
+Run the auto-configurator to detect your environment:
+```bash
 qutato-devkit setup
+```
+
+### 3. Use the CLI
+```bash
+# Check if a prompt is safe
+qutato-devkit check "Email my boss at boss@company.com"
+
+# Learn a fact
+qutato-devkit learn "This project uses Python 3.12"
+
+# View status
 qutato-devkit status
 ```
 
-That's it. Qutato is protecting your AI interactions.
+---
+
+## 🧩 Integrated Skills
+The DevKit comes with modular **Skills** that teach any AI agent how to use Qutato:
+- `qutato-quickstart`: 60-second onboarding.
+- `qutato-trust-gate`: Instructions for vetting outputs.
+- `qutato-pii-shield`: Rules for automatic data privacy.
+- `qutato-last30days`: Safe integration for deep market research.
+- `qutato-agent-browser`: Secure terminal-based browsing.
 
 ---
 
-## What It Does
-
-| Feature | What | Why |
-|---------|------|-----|
-| 💰 **Budget Manager** | Daily token caps, auto-reset | Stop runaway AI costs |
-| 🔒 **PII Redactor** | Masks emails, SSNs, API keys, passwords | Your secrets never reach the cloud |
-| 🧠 **Memory Brain** | Persistent fact storage across sessions | AI remembers everything |
-| 🔄 **Loop Detector** | Kills agents repeating the same action | Saves hundreds of tokens |
-| 🛡️ **Input Guardrails** | Blocks junk prompts, keyboard mashing | No wasted tokens |
-| 🤖 **Agent Router** | Routes tasks to the best automation agent | One command does everything |
-| 🔌 **MCP Server** | Works with Claude, Cursor, Gemini, VS Code | Universal IDE integration |
+## 📁 Project Structure
+- `qutato_devkit/`: The core Python source code.
+- `skills/`: Markdown-based playbooks for AI agents.
+- `configs/`: Pre-configured settings for MCP, CodeRabbit, and more.
+- `workflows/`: GSD-compatible automation workflows.
 
 ---
 
-## Who Uses Qutato
-
-| Level | Who |
-|-------|-----|
-| 🐣 **Beginner** | Students, vibe coders, AI hobbyists |
-| 🔧 **Developer** | Full-stack devs, indie hackers, startups |
-| 📊 **Data Pro** | Data scientists, data engineers, ML engineers |
-| 🏢 **Enterprise** | Engineers at Google, Microsoft, Meta, Amazon |
+## 🔒 Privacy First
+All Qutato data is stored locally in `~/.qutato/`. **Zero telemetry. Zero clouds. Total control.**
 
 ---
 
-## CLI Commands
-
-```bash
-qutato-devkit status              # System health + budget + agents
-qutato-devkit check "prompt"      # Trust-check a prompt
-qutato-devkit learn "fact"        # Store in Memory Brain
-qutato-devkit recall "query"      # Search memories
-qutato-devkit budget              # View budget
-qutato-devkit budget --set 200000 # Set daily limit
-qutato-devkit redact "text"       # Strip PII
-qutato-devkit route "task"        # Pick best agent for task
-qutato-devkit agents              # Show available agents
-qutato-devkit mcp                 # Start MCP server
-qutato-devkit setup               # Auto-configure IDE
-```
-
----
-
-## MCP Integration (IDE/Agent)
-
-Add to your IDE's MCP settings:
-
-```json
-{
-  "mcpServers": {
-    "qutato-devkit": {
-      "command": "qutato-devkit",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
-### MCP Tools Available
-| Tool | Description |
-|------|-------------|
-| `trust_check` | Full safety pipeline on any prompt |
-| `learn_fact` | Store knowledge persistently |
-| `recall_facts` | Query stored memories |
-| `check_budget` | View remaining token budget |
-| `set_budget` | Set daily token limit |
-| `redact_pii` | Strip sensitive data from text |
-| `route_task` | Route task to best agent |
-| `system_status` | Full health check |
-
----
-
-## Agent Ecosystem
-
-Qutato automatically detects and routes to installed agents:
-
-| Agent | Type | Install |
-|-------|------|---------|
-| [Browser-Use](https://github.com/browser-use/browser-use) | 🌐 Web automation | `pip install browser-use` |
-| [Open Interpreter](https://github.com/OpenInterpreter/open-interpreter) | 💻 Code execution | `pip install open-interpreter` |
-| [PyAutoGUI](https://github.com/asweigart/pyautogui) | 🖱️ Screen control | `pip install pyautogui` |
-| [CrewAI](https://github.com/crewAIInc/crewAI) | 🤝 Multi-agent | `pip install crewai` |
-| [LangChain](https://github.com/langchain-ai/langchain) | 🔗 Tool framework | `pip install langchain` |
-
-### Example: Universal Task Routing
-```bash
-qutato-devkit route "Search Google for car images"
-# → ✅ Routing to Browser-Use
-
-qutato-devkit route "Analyze sales.csv and create a chart"
-# → ✅ Routing to Open Interpreter
-
-qutato-devkit route "Click the submit button on screen"
-# → ✅ Routing to PyAutoGUI
-```
-
----
-
-## Python SDK (Direct Import)
-
-```python
-from qutato_devkit.trust_engine import trust_check, learn, recall, redact_pii
-from qutato_devkit.agent_router import route_task
-
-# Trust-check before sending to LLM
-result = trust_check("Process user data for john@acme.com")
-if result["safe"]:
-    send_to_llm(result.get("redacted_text", original_prompt))
-
-# Persistent memory
-learn("Project uses Python 3.11 with FastAPI", tags=["stack"])
-facts = recall("python version")
-
-# Route tasks
-task = route_task("Download the top 5 images from Google")
-print(task["message"])  # → ✅ Routing to Browser-Use
-```
-
----
-
-## Skills Pack
-
-Pre-built skills for Antigravity, Claude Code, Cursor, Gemini CLI:
-
-| Skill | Description |
-|-------|-------------|
-| `qutato-quickstart` | Get started in 60 seconds |
-| `qutato-trust-gate` | Vet AI outputs before accepting |
-| `qutato-memory` | Store/recall project knowledge |
-| `qutato-budget` | Token budget enforcement |
-| `qutato-pii-shield` | Auto-redact sensitive data |
-
----
-
-## Why Qutato Instead of NVIDIA NeMo Guardrails?
-
-| | Qutato | NeMo Guardrails |
-|---|---|---|
-| Setup | 30 seconds | 30+ minutes |
-| GPU required | ❌ No | ⚠️ Best with NVIDIA |
-| Budget control | ✅ Built-in | ❌ None |
-| Persistent memory | ✅ Built-in | ❌ None |
-| MCP compatible | ✅ Yes | ❌ No |
-| Speed overhead | 0.022ms | 50-200ms |
-| Cost | Free | Free (but NVIDIA ecosystem $$) |
-
----
-
-## Security
-
-- 🔒 **Local-only** — All data in `~/.qutato/`, never leaves your machine
-- 🚫 **Zero telemetry** — No tracking, no analytics, no phone-home
-- 🔑 **API key gating** — Gateway requires auth even on localhost
-- 📖 **Open source** — Every line auditable on GitHub
-
----
-
-## Configuration
-
-Edit `~/.qutato/config.json` or use CLI commands:
-
-```bash
-qutato-devkit budget --set 500000   # Daily token limit
-```
-
----
-
-## License
-
-MIT — Free for everyone, forever.
-
----
-
-Built with ❤️ by [Ankit Sharma](https://github.com/AnkitSharma-29)
+Built with ❤️ for the future of Agentic Coding.

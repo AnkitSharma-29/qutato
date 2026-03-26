@@ -53,15 +53,20 @@ async def run_qutato_browser(prompt: str, api_key: str):
         base_url="https://openrouter.ai/api/v1",
     )
     
+    from browser_use import Browser
+    
     # --- 3. Execute Browser-Use ---
-    print("🌐 Launching AI Browser...")
+    print("🌐 Launching AI Browser (Visible Mode)...")
     
     # Use the redacted instruction if PII was stripped by Qutato
     final_instruction = trust_report.get("redacted_text", prompt)
     
+    browser = Browser(headless=False)
+    
     agent = Agent(
         task=final_instruction,
-        llm=llm
+        llm=llm,
+        browser=browser
     )
     
     result = await agent.run()
@@ -74,8 +79,11 @@ async def run_qutato_browser(prompt: str, api_key: str):
 if __name__ == "__main__":
     load_dotenv()
     
-    # Hardcoded key from user request, or fallback to environment variables
-    api_key = os.environ.get("OPENROUTER_API_KEY", "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")
+    # Use environment variable for OpenRouter key
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        print("❌ Error: OPENROUTER_API_KEY environment variable not set.")
+        sys.exit(1)
     
     if len(sys.argv) > 1:
         task = " ".join(sys.argv[1:])
