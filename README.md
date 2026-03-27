@@ -144,7 +144,8 @@ The **Qutato DevKit** is a unified toolkit for building and running autonomous A
 
 ### Plug-and-Play Architecture (Zero Config)
 - **Out-of-the-box**: Qutato works immediately without any special configuration. It defaults to a high-performance **Basic Abstention Engine** that uses reliable adaptive thresholding.
-- **Advanced Extensions**: Power users and researchers can plug in their own custom engines by setting the `QUTATO_ABSTENTION_PLUGIN` environment variable.
+- **Advanced Extensions**: Power users and researchers can plug in their own custom engines by setting the `QUTATO_ABSTENTION_PLUGIN` environment variable. (e.g., `rescue_plugin.py` for recovery tasks).
+- **Skill Ecosystem**: Includes ready-to-use skills like `qutato-antigravity-monitor` for automatic server recovery.
 - **Community Safe**: No proprietary code or secret logic is required for the platform to provide full value.
 
 ### Sidecar (Agent SDK)
