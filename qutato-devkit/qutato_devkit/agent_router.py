@@ -99,6 +99,39 @@ def detect_available_agents() -> dict:
                 "Database queries", "Tool chaining"
             ],
         },
+        "paperclip": {
+            "name": "Paperclip",
+            "type": "orchestration",
+            "installed": _check_command("npx"),
+            "description": "Open-source orchestration for zero-human companies",
+            "install": "npx paperclipai onboard",
+            "github": "https://github.com/paperclipai/paperclip",
+            "use_cases": [
+                "Company orchestration", "Agent teams", "Budgeting", "Governance"
+            ],
+        },
+        "mirofish": {
+            "name": "MiroFish",
+            "type": "swarm",
+            "installed": _check_module("mirofish") or _check_command("mirofish"),
+            "description": "Universal Swarm Intelligence Engine for predictions",
+            "install": "pip install mirofish",
+            "github": "https://github.com/666ghj/MiroFish",
+            "use_cases": [
+                "Swarm intelligence", "Future prediction", "Market simulation"
+            ],
+        },
+        "bettafish": {
+            "name": "BettaFish",
+            "type": "opinion",
+            "installed": _check_module("bettafish") or _check_command("bettafish"),
+            "description": "Multi-agent public opinion analysis assistant",
+            "install": "pip install bettafish",
+            "github": "https://github.com/666ghj/BettaFish",
+            "use_cases": [
+                "Public opinion analysis", "Information neutrality", "Trend prediction"
+            ],
+        },
     }
 
     return agents
@@ -126,6 +159,18 @@ TASK_KEYWORDS = {
         "research and", "find and then", "multiple steps", "workflow",
         "analyze and create", "team", "crew", "agents working together",
     ],
+    "orchestration": [
+        "company", "org chart", "orchestrate", "business", "employees",
+        "manager", "paperclip", "zero-human", "entrepreneur",
+    ],
+    "swarm": [
+        "swarm", "intelligence", "predict", "simulation", "mirofish",
+        "modeling", "future scenarios", "collective",
+    ],
+    "opinion": [
+        "opinion", "analysis", "bettafish", "public feeling", "sentiment",
+        "neutrality", "decision support", "market sentiment", "breaking news",
+    ],
 }
 
 AGENT_TYPE_MAP = {
@@ -133,6 +178,9 @@ AGENT_TYPE_MAP = {
     "desktop": "open_interpreter",
     "screen": "pyautogui",
     "multi_agent": "crewai",
+    "orchestration": "paperclip",
+    "swarm": "mirofish",
+    "opinion": "bettafish",
 }
 
 
