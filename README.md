@@ -82,6 +82,7 @@ qutato status
 - **[Persistent Memory Brain](#memory-engine)** — A "Second Brain" for agents that stores facts and recalls context across sessions.
 - **[MCP Server Support](#mcp)** — Connect Qutato directly to Cursor, Claude Code, or Antigravity via the Model Context Protocol.
 - **[Universal Compatibility](#integrations)** — Works with OpenClaw, Roo Code, Continue, Ollama, LM Studio, and any OpenAI-compatible tool.
+- **[Advanced Security](#security-model)** — Machine-bound AES-128 storage encryption and "OBLITERATUS Lite" prompt injection detection.
 - **[Qutato Turbo](#qutato-turbo)** — Sub-millisecond adaptive optimization. Includes Concise Mode and Context Pruning to save up to 40% on token costs.
 - **[Global CLI](#cli-commands)** — `qutato` and `qutato-devkit` commands available from any terminal.
 
@@ -132,9 +133,17 @@ The **Qutato DevKit** is a unified toolkit for building and running autonomous A
 - **Lagrangian Derivation:** The threshold is derived from a formal trade-off between false positives and false negatives.
 
 #### PII Redactor (Privacy Shield) 🔒
-- **Automatic Masking**: Detects and masks Emails, SSNs, Credit Cards, and API Keys *locally* before they reach the LLM provider.
+- **Automatic Masking**: Detects and masks Emails, SSNs, Credit Cards, JWTs, Cloud Secrets, and API Keys *locally* before they reach the LLM provider.
 - **Privacy vs. Execution Pattern**: The LLM (Mastermind) sees redacted data, but your local Python code (Executor) uses the real data from a secure vault to fulfill tasks (e.g., Amazon purchases).
 - **Transactional Bypass**: Use `--bypass-pii` (CLI) or `bypass_pii_redaction=True` (SDK) for intentional data sharing.
+
+#### Injection Guard (OBLITERATUS Lite) 🛡️
+- **Active Defense**: Automatically detects and blocks adversarial prompt injections (e.g., "Ignore previous instructions", "System override").
+- **Cost Protection**: Blocks malicious framing before it hits your LLM budget.
+
+#### Encrypted Storage 🔒
+- **Hardware Bound**: All local data (memories, budget, config) is encrypted using AES-128 with a key bound to your machine's hardware ID.
+- **Zero-Trust Local**: Even if physical files are stolen, they cannot be decrypted on another machine without your unique **Recovery Key**.
 
 #### Quota Savings
 - **Junk Interception:** Each blocked junk prompt saves ~10 tokens.
@@ -165,6 +174,9 @@ else:
 ### Automation & Browser Agents 🌐
 Qutato provides native integration wrappers for the industry's best automation tools:
 - **[Browser-Use](https://github.com/browser-use/browser-use)**: AI-driven Chrome automation with Qutato safety checks.
+- **[Paperclip](https://github.com/paperclipai/paperclip)**: Orchestrate complex AI companies and agent teams with governance.
+- **[MiroFish](https://github.com/666ghj/MiroFish)**: Universal swarm intelligence engine for future prediction and modeling.
+- **[BettaFish](https://github.com/666ghj/BettaFish)**: Multi-agent public opinion analysis and information neutrality.
 - **[Agent-Browser](https://github.com/vercel-labs/agent-browser)**: Vercel's CLI browser automation, forced through the trust gate.
 - **[Last30Days](https://github.com/mvanhorn/last30days-skill)**: Safe multi-platform research (Reddit, X, YouTube) with budget and PII shielding.
 - **[Open Interpreter](https://github.com/OpenInterpreter/open-interpreter)**: Secure terminal and system task execution.
@@ -177,6 +189,7 @@ Qutato provides native integration wrappers for the industry's best automation t
 | `qutato learn "fact"` | Store a new fact in the memory brain |
 | `qutato recall "query"` | Search for facts by keyword |
 | `qutato forget` | Clear the memory brain |
+| `qutato recovery-key` | View your machine-bound decryption key |
 
 ---
 
@@ -307,9 +320,12 @@ Qutato is designed for **local-first, privacy-first** operation.
 
 - **No Data Exfiltration:** Your LLM keys, prompts, and memories never leave your machine.
 - **No Telemetry:** Zero analytics, zero tracking, zero phone-home.
-- **Local Storage Only:** All data persists in `~/.qutato/` on your filesystem.
+- **Encrypted Local Storage:** All data is encrypted with AES-128 and bound to your machine's Hardware ID.
 - **API Key Gating:** Even on localhost, the Gateway requires authentication to prevent unauthorized access from other apps on your network.
 - **Open Source Audit:** Every line of code is visible and verifiable on GitHub.
+
+### 🔑 Recovery and Migration
+Since data is machine-bound, use `qutato recovery-key` to generate a migration seed if you need to move your Qutato instance to a new device.
 
 ---
 
