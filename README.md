@@ -366,4 +366,4 @@ We welcome contributions! Please see our [Issues](https://github.com/AnkitSharma
 MIT License. See [LICENSE](LICENSE) for details.
 
 ---
-*Built for the Agentic Era by [Ankit Sharma](https://github.com/AnkitSharma-29)* 🛡️
+*Built for the Agentic Era by [Ankit Sharma](https://github.com/AnkitSharma-29)*
